@@ -14,10 +14,6 @@ class Packet:
         self.payload = payload
         self.checksum = checksum
 
-    def to_bytes(self):
-        # encode packet into bytes for UDP transmission
-        return f"{self.seq_num}|{self.ack_num}|{self.payload}|{self.checksum}".encode()
-
     def __repr__(self):
         return (
             f"Packet(seq_num={self.seq_num}, "
@@ -25,6 +21,11 @@ class Packet:
             f"payload={self.payload}, "
             f"checksum={self.checksum})"
         )
+
+
+def to_bytes(packet):
+    # encode packet into bytes for UDP transmission
+    return f"{packet.seq_num}|{packet.ack_num}|{packet.payload}|{packet.checksum}".encode()
 
 
 def from_bytes(data):

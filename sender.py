@@ -14,7 +14,7 @@
 # - this is baseline before adding sliding window / selective repeat
 
 import socket
-from packet import Packet, from_bytes
+from packet import Packet, from_bytes, to_bytes
 
 
 class Sender:
@@ -38,7 +38,7 @@ class Sender:
 
         while True:
             print(f"[SENDER] sending seq={self.seq_num}")
-            self.sock.sendto(packet.to_bytes(), self.addr)
+            self.sock.sendto(to_bytes(packet), self.addr)
 
             try:
                 # wait for ACK from receiver
