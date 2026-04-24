@@ -10,11 +10,12 @@
 # NOTES:
 # - receiver should send ACK packets where ack_num == seq_num being acknowledged
 # - we only advance seq_num after correct ACK
-# - checksum is not implemented yet (placeholder = 0)
+# - checksum is calculated for outgoing data packets
 # - this is baseline before adding sliding window / selective repeat
 
 import socket
 from packet import Packet, from_bytes, to_bytes
+from utils import calculate_checksum
 
 
 class Sender:
@@ -33,8 +34,8 @@ class Sender:
 
     def send(self, message):
         # build packet for current sequence number
-        # NOTE: checksum is placeholder for now
-        packet = Packet(self.seq_num, 0, message, 0)
+        checksum = calculate_checksum(self.seq_num, 0, message)
+        packet = Packet(self.seq_num, 0, message, checksum)
 
         while True:
             print(f"[SENDER] sending seq={self.seq_num}")
