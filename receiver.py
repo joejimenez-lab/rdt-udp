@@ -17,7 +17,8 @@ class Receiver:
             resp_in_bytes, addr = self.s.recvfrom(2048)
             p = from_bytes(resp_in_bytes)
             print(f"printing the extracted packet: {p}")
-            self.send_ack(p.ack_num, addr)
+            if p.checksum == 0:
+                self.send_ack(p.ack_num, addr)
 
 recv = Receiver('localhost', 9000)
 recv.start()
