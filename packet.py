@@ -23,12 +23,12 @@ class Packet:
         )
 
 
-def to_bytes(packet):
+def convert_to_bytes(packet):
     # encode packet into bytes for UDP transmission
     return f"{packet.seq_num}|{packet.ack_num}|{packet.payload}|{packet.checksum}".encode()
 
 
-def from_bytes(data):
+def extract_from_bytes(data):
     # parse incoming packet bytes back into a Packet object
     parts = data.decode().split("|", 3)
 

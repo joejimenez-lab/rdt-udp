@@ -14,7 +14,7 @@
 # - this is baseline before adding sliding window / selective repeat
 
 import socket
-from packet import Packet, from_bytes, to_bytes
+from packet import Packet, extract_from_bytes, convert_to_bytes
 from utils import calculate_checksum
 
 
@@ -39,12 +39,12 @@ class Sender:
 
         while True:
             print(f"[SENDER] sending seq={self.seq_num}")
-            self.sock.sendto(to_bytes(packet), self.addr)
+            self.sock.sendto(convert_to_bytes(packet), self.addr)
 
             try:
                 # wait for ACK from receiver
                 ack_bytes, _ = self.sock.recvfrom(2048)
-                ack_packet = from_bytes(ack_bytes)
+                ack_packet = extract_from_bytes(ack_bytes)
 
                 print(f"[SENDER] received: {ack_packet}")
 
