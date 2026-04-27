@@ -1,5 +1,6 @@
 import socket
 from packet import Packet, convert_to_bytes, extract_from_bytes
+from utils import calculate_checksum
 
 class Receiver:
     def __init__(self, host, port):
@@ -17,8 +18,14 @@ class Receiver:
             resp_in_bytes, addr = self.s.recvfrom(2048)
             p = extract_from_bytes(resp_in_bytes)
             print(f"printing the extracted packet: {p}")
-            if p.checksum == 0:
-                self.send_ack(p.ack_num, addr)
+
+            # Calculate checksum, ignore packet if invalid checksum
+            calculated_checksum = calculate_checksum(p.seq_num, p.ack_num, p.payload)
+            if p.checksum != calculated_checksum:
+                print(f"ignoring corrupt packet {p.seq_num}")
+                continue
+
+            self.send_ack(p.ack_num, addr)
 
 recv = Receiver('localhost', 9000)
 recv.start()
