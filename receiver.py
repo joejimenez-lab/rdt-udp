@@ -25,7 +25,7 @@ class Receiver:
                 print(f"ignoring corrupt packet {p.seq_num}")
                 continue
 
-            self.send_ack(p.ack_num, addr)
+            self.send_ack(p.seq_num, addr)
 
 recv = Receiver('localhost', 9000)
 recv.start()
