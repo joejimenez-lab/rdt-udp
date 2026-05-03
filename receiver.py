@@ -11,7 +11,8 @@ class Receiver:
         self.expected_seq_num = 0
 
     def send_ack(self, ack_num, addr):
-        p = Packet(0, ack_num, '', 0)
+        checksum = calculate_checksum(0, ack_num, '')
+        p = Packet(0, ack_num, '', checksum)
         self.s.sendto(convert_to_bytes(p), addr)
         print(f"sent ACK: {ack_num} to {addr}")
 
