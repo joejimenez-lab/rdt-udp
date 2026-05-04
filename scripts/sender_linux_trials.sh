@@ -35,6 +35,7 @@ Common environment variables:
   MAX_RETRIES=10        Retransmissions before sender gives up.
   TRIALS=3              Number of sender runs per scenario.
   MESSAGE='text'        Message to send.
+  ALLOW_LEGACY_ACKS=0   Set to 1 to accept old ACK packets with checksum=0.
   RESULTS_DIR=results   Directory for report logs.
 
 Examples:
@@ -43,8 +44,8 @@ Examples:
   PAYLOAD_SIZE=8 WINDOW_SIZE=4 TRIALS=5 scripts/sender_linux_trials.sh
 
 Notes:
-  The current sender accepts legacy checksum=0 ACKs by default.
-  For strict ACK checksum testing, add STRICT_ACK_CHECKSUM=1.
+  Sender and receiver both calculate ACK checksums by default.
+  Use ALLOW_LEGACY_ACKS=1 only when testing with an older receiver.
 USAGE
 }
 
@@ -88,8 +89,8 @@ run_sender_once() {
         --message "$MESSAGE"
     )
 
-    if [[ "${STRICT_ACK_CHECKSUM:-0}" == "1" ]]; then
-        cmd+=(--strict-ack-checksum)
+    if [[ "${ALLOW_LEGACY_ACKS:-0}" == "1" ]]; then
+        cmd+=(--allow-legacy-acks)
     fi
 
     log ""

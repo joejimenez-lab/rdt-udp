@@ -16,7 +16,7 @@
 # - data packets use seq_num for ordering
 # - ACK packets should set ack_num to the seq_num being acknowledged
 # - ACK checksums should be calculated over seq_num, ack_num, and payload
-# - checksum=0 ACKs are still accepted by default while the receiver is simple
+# - checksum=0 ACKs can be accepted only when legacy ACK compatibility is enabled
 #
 # Notes:
 # - window_size=1 gives normal stop-and-wait behavior
@@ -62,7 +62,7 @@ class Sender:
         payload_size=DEFAULT_PAYLOAD_SIZE,
         window_size=DEFAULT_WINDOW_SIZE,
         max_retries=None,
-        allow_legacy_acks=True,
+        allow_legacy_acks=False,
     ):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.settimeout(timeout)
@@ -202,8 +202,7 @@ class Sender:
         return packets
 
     def _ack_checksum_is_valid(self, ack_packet):
-        # Check ACK integrity. The current receiver still sends ACKs with
-        # checksum=0, so we accept those by default while testing.
+        # Check ACK integrity. Legacy checksum=0 ACKs are opt-in only.
         expected = calculate_checksum(
             ack_packet.seq_num,
             ack_packet.ack_num,
@@ -271,9 +270,9 @@ def parse_args():
     )
     parser.add_argument("--file", help="text file to send instead of --message")
     parser.add_argument(
-        "--strict-ack-checksum",
+        "--allow-legacy-acks",
         action="store_true",
-        help="reject ACK packets whose checksum is 0 or invalid",
+        help="accept old ACK packets with checksum=0",
     )
     return parser.parse_args()
 
@@ -293,7 +292,7 @@ def main():
         payload_size=args.payload_size,
         window_size=args.window_size,
         max_retries=args.max_retries,
-        allow_legacy_acks=not args.strict_ack_checksum,
+        allow_legacy_acks=args.allow_legacy_acks,
     )
 
     try:
