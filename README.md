@@ -117,8 +117,9 @@ scripts/tc_netem.sh show
 scripts/tc_netem.sh clear
 ```
 
-The trial script can run repeated sender-side scenarios while a receiver is
-already running:
+The trial script starts a fresh receiver for each trial, applies the network
+condition, runs one sender transfer, saves sender and receiver logs, then clears
+the network rule:
 
 ```bash
 scripts/sender_linux_trials.sh
