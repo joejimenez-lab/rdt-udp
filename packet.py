@@ -1,11 +1,10 @@
-# Packet format (temporary, string based for easy debugging):
+# Packet format (string based for easy debugging):
 # seq_num|ack_num|payload|checksum
 #
 # NOTES:
-# - checksum is a placeholder for now (we’ll replace with a real one later)
+# - checksum is calculated over the packet fields to detect corruption
 # - ack_num is the sequence number being acknowledged
-# - this format is intentionally simple so sender/receiver stay in sync early
-# - once everything works, we can switch to a structured/byte-based format
+# - this format is intentionally simple and readable during testing
 
 class Packet:
     def __init__(self, seq_num, ack_num, payload, checksum):

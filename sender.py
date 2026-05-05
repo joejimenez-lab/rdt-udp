@@ -20,8 +20,8 @@
 #
 # Notes:
 # - window_size=1 gives normal stop-and-wait behavior
-# - larger window sizes let us test sender-side sliding window behavior
-# - full selective repeat still needs receiver-side buffering/ACK support
+# - larger window sizes allow multiple unacknowledged packets in flight
+# - receiver buffering handles valid packets inside its receive window
 
 import argparse
 import socket

@@ -125,6 +125,21 @@ clears the network rule:
 scripts/run_preset_tests.py --menu
 ```
 
+Each run is saved under its own folder:
+
+```text
+results/YYYYMMDD_HHMMSS/
+```
+
+After a run finishes, summarize it with:
+
+```bash
+scripts/summarize_results.py
+```
+
+The summary script asks for a run id or lets you select the latest run, then
+prints the important sender statistics and a compact result table.
+
 Useful options:
 
 ```bash
@@ -133,6 +148,7 @@ scripts/run_preset_tests.py
 scripts/run_preset_tests.py --tests baseline loss_5_percent
 scripts/run_preset_tests.py --trials 3 --payload-size 8
 scripts/run_preset_tests.py --iface eth0 --host 192.168.1.20
+scripts/summarize_results.py 20260505_202004
 ```
 
 A Bash runner is also available at `scripts/sender_linux_trials.sh` for the same
