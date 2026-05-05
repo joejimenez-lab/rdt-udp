@@ -1,53 +1,58 @@
 # Reliable Data Transfer over UDP
 
-This project implements a reliable data transfer protocol on top of UDP using
-Python. UDP does not guarantee delivery, ordering, duplicate protection, or data
-integrity, so this project adds those reliability features at the application
-layer.
+This project implements a small reliable data transfer protocol on top of UDP in
+Python. UDP by itself does not guarantee delivery, ordering, duplicate
+protection, or corruption detection, so the sender and receiver add those pieces
+at the application layer.
 
-The long-term goal is to build the protocol in stages:
+The project starts from stop-and-wait behavior and extends it with packet
+checksums, ACK validation, timeout-based retransmission, message packetization,
+and configurable sender window size. The packet format is intentionally simple
+so the protocol state is easy to inspect while testing.
 
-1. Stop-and-wait reliable transfer
-2. Checksums for corruption detection
-3. ACK handling and retransmission on timeout
-4. Larger message transfer across multiple packets
-5. Sliding window support
-6. Selective repeat for retransmitting only lost or corrupted packets
+## Protocol
 
-## Current Status
-
-The project is currently in the first implementation stage. The sender supports
-a basic stop-and-wait flow:
-
-- build a packet with a sequence number, ACK number, payload, and checksum
-- send the packet over UDP
-- wait for an ACK from the receiver
-- retransmit the same packet if the timeout expires
-- move to the next sequence number only after receiving the expected ACK
-
-The packet format is temporary and string-based so it is easy to print and debug:
+Packets are encoded as text:
 
 ```text
 seq_num|ack_num|payload|checksum
 ```
 
-The current implementation is not the final protocol yet. It is meant to provide
-a simple baseline before adding sliding windows and selective repeat.
+The fields are:
 
-## Project Structure
+- `seq_num`: sequence number for data ordering.
+- `ack_num`: sequence number being acknowledged.
+- `payload`: message data carried by the packet.
+- `checksum`: checksum over `seq_num`, `ack_num`, and `payload`.
+
+The sender splits a message into payload-sized chunks, assigns sequence numbers,
+computes checksums, sends packets over UDP, and waits for matching ACKs. If an
+ACK is missing, malformed, corrupt, or outside the active sender state, the
+sender ignores it and relies on timeout retransmission.
+
+The receiver validates incoming data checksums before sending an ACK. Valid
+packets inside the receiver window are acknowledged and delivered in sequence.
+Duplicate packets that were already acknowledged can be ACKed again so the
+sender can recover when an earlier ACK was lost.
+
+## Files
 
 ```text
 .
-├── sender.py              # Stop-and-wait sender logic
-├── receiver.py            # UDP receiver used for local testing
+├── sender.py              # Sender, retransmission logic, CLI options
+├── receiver.py            # UDP receiver, checksum checks, ACK generation
 ├── packet.py              # Packet object and byte conversion helpers
-├── utils.py               # Shared helper functions, including checksum logic
-└── Docs/                  # Proposal and progress report files
+├── utils.py               # Checksum and CRC helper functions
+├── scripts/
+│   ├── tc_netem.sh        # Linux tc/netem helper for delay/loss/corruption
+│   └── sender_linux_trials.sh
+├── linux_test_results/    # Saved sender and receiver logs from test runs
+└── Docs/                  # Proposal, progress report, and report draft
 ```
 
 ## Running Locally
 
-Run the receiver in one terminal:
+Start the receiver in one terminal:
 
 ```bash
 python3 receiver.py
@@ -56,36 +61,104 @@ python3 receiver.py
 Run the sender in another terminal:
 
 ```bash
-python3 sender.py
+python3 sender.py --message "hello reliable udp" --max-retries 5
 ```
 
-The sender currently sends a test message to `localhost` on port `9000`.
+Run a multi-packet transfer by lowering the payload size:
 
-## Planned Features
+```bash
+python3 sender.py \
+  --message "this message is split into several reliable udp packets" \
+  --payload-size 8 \
+  --max-retries 5
+```
 
-- Validate checksums on incoming ACK packets
-- Validate checksums on incoming data packets
-- Split larger messages into multiple packets
-- Detect and handle duplicate packets
-- Track ordering with sequence numbers
-- Add packet loss, corruption, and delay testing
-- Implement a sliding window
-- Implement selective repeat
-- Measure throughput, latency, and retransmissions
+Run with a larger sender window:
 
-## Testing Plan
+```bash
+python3 sender.py \
+  --message "testing a larger sender window" \
+  --payload-size 8 \
+  --window-size 4 \
+  --max-retries 5
+```
 
-Initial testing is done locally using two terminals on the same machine. The
-sender and receiver communicate over `localhost` using UDP sockets.
+For separate manual sender runs, restart the receiver between runs. The receiver
+keeps its current expected sequence number in memory, while each new sender
+process starts sequence numbers from zero.
 
-Later testing will include:
+## Linux Network Testing
 
-- packet loss simulation
-- packet corruption simulation
-- artificial network delay
-- different timeout values
-- different sliding window sizes
-- transfer tests across two machines on the same network
+The `scripts/tc_netem.sh` helper uses Linux `tc netem` to simulate delay, packet
+loss, corruption, duplication, and reordering. It usually needs `sudo`.
+
+Apply 100 ms delay:
+
+```bash
+DELAY=100ms LOSS=0% CORRUPT=0% scripts/tc_netem.sh apply
+```
+
+Apply 5% packet loss:
+
+```bash
+DELAY=0ms LOSS=5% CORRUPT=0% scripts/tc_netem.sh apply
+```
+
+Apply 10% corruption:
+
+```bash
+DELAY=0ms LOSS=0% CORRUPT=10% scripts/tc_netem.sh apply
+```
+
+Check and clear the active rule:
+
+```bash
+scripts/tc_netem.sh show
+scripts/tc_netem.sh clear
+```
+
+The trial script can run repeated sender-side scenarios while a receiver is
+already running:
+
+```bash
+scripts/sender_linux_trials.sh
+```
+
+Useful options:
+
+```bash
+TRIALS=5 TIMEOUT=0.5 scripts/sender_linux_trials.sh
+PAYLOAD_SIZE=8 WINDOW_SIZE=4 TRIALS=5 scripts/sender_linux_trials.sh
+IFACE=eth0 HOST=192.168.1.20 scripts/sender_linux_trials.sh
+```
+
+## Test Results
+
+Saved logs are included under `linux_test_results/`. Each scenario has a sender
+log and a matching receiver log.
+
+| Scenario | Result | Original packets | Packets sent | Retransmissions | Timeouts | ACKs received |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Baseline | Pass | 10 | 10 | 0 | 0 | 10 |
+| 100 ms delay | Pass | 10 | 10 | 0 | 0 | 10 |
+| 5% packet loss | Pass | 10 | 12 | 2 | 2 | 10 |
+| 2% corruption | Pass | 11 | 11 | 0 | 0 | 11 |
+| 10% corruption | Pass | 11 | 13 | 2 | 2 | 11 |
+| Window size 4 | Pass | 11 | 11 | 0 | 0 | 11 |
+
+The loss and corruption runs show the main recovery behavior: packets or ACKs
+were dropped/corrupted, the sender timed out, retransmitted the missing packet,
+and still completed the transfer.
+
+## Current Limitations
+
+- The packet format is text-based and uses `|` as a separator, so payloads cannot
+  contain `|`.
+- Receiver runtime options are not yet exposed through command-line arguments.
+- Receiver state is per process. Restart the receiver for independent manual test
+  runs that start sender sequence numbers at zero.
+- The implementation demonstrates reliable transfer behavior for this project,
+  but it is not a production transport protocol.
 
 ## Authors
 
