@@ -280,10 +280,13 @@ def main():
         raise FileNotFoundError(f"Expected tc helper at {TC_SCRIPT}")
     require_receiver_port_available(args.host, args.port)
 
-    results_dir = Path(args.results_dir)
-    results_dir.mkdir(parents=True, exist_ok=True)
+    results_root = Path(args.results_dir)
+    results_root.mkdir(parents=True, exist_ok=True)
     run_id = time.strftime("%Y%m%d_%H%M%S")
-    summary_log = results_dir / f"preset_tests_{run_id}.log"
+    run_dir = results_root / run_id
+    run_dir.mkdir(parents=True, exist_ok=False)
+    args.results_dir = str(run_dir)
+    summary_log = run_dir / f"preset_tests_{run_id}.log"
     failures = 0
 
     def handle_signal(signum, _frame):
@@ -297,7 +300,8 @@ def main():
     with summary_log.open("w", encoding="utf-8") as summary:
         summary.write("Preset reliable-UDP test log\n")
         summary.write(f"Started: {time.ctime()}\n")
-        summary.write(f"Results directory: {results_dir}\n")
+        summary.write(f"Run ID: {run_id}\n")
+        summary.write(f"Results directory: {run_dir}\n")
 
         presets_to_run = (
             prompt_for_presets()
@@ -333,7 +337,9 @@ def main():
         summary.write(f"\nCompleted: {time.ctime()}\n")
         summary.write(f"Total failures: {failures}\n")
 
-    print(f"\nSummary log: {summary_log}")
+    print(f"\nRun ID: {run_id}")
+    print(f"Results folder: {run_dir}")
+    print(f"Summary log: {summary_log}")
     return 1 if failures else 0
 
 
