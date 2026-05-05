@@ -146,10 +146,18 @@ Useful options:
 scripts/run_preset_tests.py --list
 scripts/run_preset_tests.py
 scripts/run_preset_tests.py --tests baseline loss_5_percent
+scripts/run_preset_tests.py --tests extreme_test
 scripts/run_preset_tests.py --trials 3 --payload-size 8
 scripts/run_preset_tests.py --iface eth0 --host 192.168.1.20
 scripts/summarize_results.py 20260505_202004
 ```
+
+The default run and menu `all` option run the normal presets only. They do not
+include the extreme test.
+
+Menu option `7`, `extreme_test`, combines 100 ms delay, 20 ms jitter, 10% loss, 5%
+corruption, 2% duplication, 5% reordering, window size 4, and a larger file
+input.
 
 A Bash runner is also available at `scripts/sender_linux_trials.sh` for the same
 basic preset workflow.

@@ -21,9 +21,17 @@ TC_SCRIPT = SCRIPT_DIR / "tc_netem.sh"
 class Preset:
     name: str
     delay: str = "0ms"
+    jitter: str = ""
     loss: str = "0%"
     corrupt: str = "0%"
+    duplicate: str = "0%"
+    reorder: str = "0%"
     window_size: int = 1
+    timeout: float | None = None
+    payload_size: int | None = None
+    max_retries: int | None = None
+    message: str | None = None
+    file_name: str | None = None
 
 
 PRESETS = [
@@ -32,7 +40,30 @@ PRESETS = [
     Preset("loss_5_percent", loss="5%"),
     Preset("corrupt_10_percent", corrupt="10%"),
     Preset("window_4_baseline", window_size=4),
+    Preset("delay_100ms_loss_5_percent", delay="100ms", loss="5%"),
+    Preset(
+        "extreme_test",
+        delay="100ms",
+        jitter="20ms",
+        loss="10%",
+        corrupt="5%",
+        duplicate="2%",
+        reorder="5%",
+        window_size=4,
+        timeout=0.75,
+        payload_size=64,
+        max_retries=50,
+        file_name="extreme_test.txt",
+        message=(
+            "Extreme reliable UDP test message. This file is intentionally "
+            "longer than the default message so the sender has to split it "
+            "across multiple packets while delay, jitter, loss, corruption, "
+            "duplication, and reordering are active. "
+        )
+        * 8,
+    ),
 ]
+DEFAULT_PRESETS = [preset for preset in PRESETS if preset.name != "extreme_test"]
 
 
 def parse_args():
@@ -57,7 +88,7 @@ def parse_args():
         nargs="+",
         choices=[preset.name for preset in PRESETS],
         default=None,
-        help="Preset tests to run. Default: all presets unless --menu is used.",
+        help="Preset tests to run. Default: normal presets, excluding extreme_test.",
     )
     parser.add_argument(
         "--menu",
@@ -101,8 +132,11 @@ def apply_netem(preset, iface, summary):
         {
             "IFACE": iface,
             "DELAY": preset.delay,
+            "JITTER": preset.jitter,
             "LOSS": preset.loss,
             "CORRUPT": preset.corrupt,
+            "DUPLICATE": preset.duplicate,
+            "REORDER": preset.reorder,
         }
     )
     run_command([str(TC_SCRIPT), "apply"], env=env, log_file=summary, check=True)
@@ -159,9 +193,24 @@ def require_receiver_port_available(host, port):
     )
 
 
+def sender_value(preset, attr_name, default):
+    value = getattr(preset, attr_name)
+    return default if value is None else value
+
+
+def prepare_input_file(args, preset):
+    if preset.file_name is None:
+        return None
+
+    file_path = Path(args.results_dir) / preset.file_name
+    file_path.write_text(preset.message or args.message, encoding="utf-8")
+    return file_path
+
+
 def run_trial(args, preset, trial, run_id, summary):
     sender_log = Path(args.results_dir) / f"{run_id}_{preset.name}_trial_{trial}_sender.log"
     receiver_log = Path(args.results_dir) / f"{run_id}_{preset.name}_trial_{trial}_receiver.log"
+    input_file = prepare_input_file(args, preset)
     sender_cmd = [
         sys.executable,
         str(ROOT_DIR / "sender.py"),
@@ -170,23 +219,30 @@ def run_trial(args, preset, trial, run_id, summary):
         "--port",
         str(args.port),
         "--timeout",
-        str(args.timeout),
+        str(sender_value(preset, "timeout", args.timeout)),
         "--payload-size",
-        str(args.payload_size),
+        str(sender_value(preset, "payload_size", args.payload_size)),
         "--window-size",
         str(preset.window_size),
         "--max-retries",
-        str(args.max_retries),
-        "--message",
-        args.message,
+        str(sender_value(preset, "max_retries", args.max_retries)),
     ]
+
+    if input_file is not None:
+        sender_cmd.extend(["--file", str(input_file)])
+    else:
+        sender_cmd.extend(["--message", preset.message or args.message])
 
     print(f"\n=== {preset.name}, trial {trial}/{args.trials} ===")
     print(f"Sender log: {sender_log}")
     print(f"Receiver log: {receiver_log}")
+    if input_file is not None:
+        print(f"Input file: {input_file}")
     summary.write(f"\n=== {preset.name}, trial {trial}/{args.trials} ===\n")
     summary.write(f"Sender log: {sender_log}\n")
     summary.write(f"Receiver log: {receiver_log}\n")
+    if input_file is not None:
+        summary.write(f"Input file: {input_file}\n")
 
     receiver_proc, receiver_handle = start_receiver(receiver_log)
     time.sleep(args.receiver_startup_delay)
@@ -217,15 +273,17 @@ def print_preset_list():
     for index, preset in enumerate(PRESETS, start=1):
         print(
             f"{index}. {preset.name} "
-            f"(delay={preset.delay}, loss={preset.loss}, "
-            f"corrupt={preset.corrupt}, window_size={preset.window_size})"
+            f"(delay={preset.delay}, jitter={preset.jitter or '0ms'}, "
+            f"loss={preset.loss}, corrupt={preset.corrupt}, "
+            f"duplicate={preset.duplicate}, reorder={preset.reorder}, "
+            f"window_size={preset.window_size})"
         )
 
 
 def prompt_for_presets():
     print("Available preset tests:")
     print_preset_list()
-    print(f"{len(PRESETS) + 1}. all")
+    print(f"{len(PRESETS) + 1}. all normal tests (excludes extreme_test)")
     print("q. quit")
     print()
     print("Choose one or more presets by number, separated by spaces or commas.")
@@ -237,7 +295,7 @@ def prompt_for_presets():
             raise SystemExit(0)
 
         if choice in {"all", "a", str(len(PRESETS) + 1)}:
-            return list(PRESETS)
+            return list(DEFAULT_PRESETS)
 
         tokens = [token for token in choice.replace(",", " ").split() if token]
         selected = []
@@ -278,6 +336,12 @@ def main():
         raise ValueError("--trials must be greater than 0")
     if not TC_SCRIPT.exists():
         raise FileNotFoundError(f"Expected tc helper at {TC_SCRIPT}")
+
+    presets_to_run = (
+        prompt_for_presets()
+        if args.menu
+        else selected_presets(args.tests or [preset.name for preset in DEFAULT_PRESETS])
+    )
     require_receiver_port_available(args.host, args.port)
 
     results_root = Path(args.results_dir)
@@ -303,18 +367,14 @@ def main():
         summary.write(f"Run ID: {run_id}\n")
         summary.write(f"Results directory: {run_dir}\n")
 
-        presets_to_run = (
-            prompt_for_presets()
-            if args.menu
-            else selected_presets(args.tests or [preset.name for preset in PRESETS])
-        )
-
         for preset in presets_to_run:
             print(f"\n############################")
             print(f"Scenario: {preset.name}")
             print(
-                f"DELAY={preset.delay} LOSS={preset.loss} "
-                f"CORRUPT={preset.corrupt} WINDOW_SIZE={preset.window_size}"
+                f"DELAY={preset.delay} JITTER={preset.jitter or '0ms'} "
+                f"LOSS={preset.loss} CORRUPT={preset.corrupt} "
+                f"DUPLICATE={preset.duplicate} REORDER={preset.reorder} "
+                f"WINDOW_SIZE={preset.window_size}"
             )
             print("############################")
             summary.write(f"\nScenario: {preset.name}\n")
