@@ -1,0 +1,45 @@
+=== corrupt_10_percent ===
+Applying netem on lo: delay 0ms loss 0% corrupt 10% duplicate 0%
+[SENDER] sending 11 packet(s) to ('127.0.0.1', 9000) with window=1
+[SENDER] sending seq=0, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=0, payload=, checksum=344)
+[SENDER] ACK ok for seq=0
+[SENDER] sending seq=1, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=1, payload=, checksum=345)
+[SENDER] ACK ok for seq=1
+[SENDER] sending seq=2, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=2, resending
+[SENDER] sending seq=2, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=2, payload=, checksum=346)
+[SENDER] ACK ok for seq=2
+[SENDER] sending seq=3, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=3, payload=, checksum=347)
+[SENDER] ACK ok for seq=3
+[SENDER] sending seq=4, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=4, payload=, checksum=348)
+[SENDER] ACK ok for seq=4
+[SENDER] sending seq=5, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=5, payload=, checksum=349)
+[SENDER] ACK ok for seq=5
+[SENDER] sending seq=6, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=6, payload=, checksum=350)
+[SENDER] ACK ok for seq=6
+[SENDER] sending seq=7, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=7, payload=, checksum=351)
+[SENDER] ACK ok for seq=7
+[SENDER] sending seq=8, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=8, payload=, checksum=352)
+[SENDER] ACK ok for seq=8
+[SENDER] sending seq=9, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=9, resending
+[SENDER] sending seq=9, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=9, payload=, checksum=353)
+[SENDER] ACK ok for seq=9
+[SENDER] sending seq=10, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=10, payload=, checksum=393)
+[SENDER] ACK ok for seq=10
+[SENDER] complete: SenderStats(original_packets=11, packets_sent=13, retransmissions=2, timeouts=2, acks_received=11, bad_ack_checksums=0, malformed_acks=0, unexpected_acks=0)
+Clearing netem on lo
+RESULT_STATUS=0

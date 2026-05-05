@@ -117,21 +117,26 @@ scripts/tc_netem.sh show
 scripts/tc_netem.sh clear
 ```
 
-The trial script starts a fresh receiver for each trial, applies the network
-condition, runs one sender transfer, saves sender and receiver logs, then clears
-the network rule:
+The Python preset runner starts a fresh receiver for each trial, applies the
+network condition, runs one sender transfer, saves sender and receiver logs, then
+clears the network rule:
 
 ```bash
-scripts/sender_linux_trials.sh
+scripts/run_preset_tests.py --menu
 ```
 
 Useful options:
 
 ```bash
-TRIALS=5 TIMEOUT=0.5 scripts/sender_linux_trials.sh
-PAYLOAD_SIZE=8 WINDOW_SIZE=4 TRIALS=5 scripts/sender_linux_trials.sh
-IFACE=eth0 HOST=192.168.1.20 scripts/sender_linux_trials.sh
+scripts/run_preset_tests.py --list
+scripts/run_preset_tests.py
+scripts/run_preset_tests.py --tests baseline loss_5_percent
+scripts/run_preset_tests.py --trials 3 --payload-size 8
+scripts/run_preset_tests.py --iface eth0 --host 192.168.1.20
 ```
+
+A Bash runner is also available at `scripts/sender_linux_trials.sh` for the same
+basic preset workflow.
 
 ## Test Results
 
