@@ -1,0 +1,214 @@
+Receiver started through scripts/run_proxy_tests.py
+Receiver started...
+current window: 0 - 1
+printing the extracted packet: Packet(seq_num=0, ack_num=0, payload=Rigorous reliabl, checksum=1965)
+sent ACK: 0 to ('127.0.0.1', 9100)
+delivering 0 to the upper layer
+current window: 1 - 2
+printing the extracted packet: Packet(seq_num=1, ack_num=0, payload=e UDP proxy stre, checksum=1799)
+sent ACK: 1 to ('127.0.0.1', 9100)
+delivering 1 to the upper layer
+current window: 2 - 3
+printing the extracted packet: Packet(seq_num=2, ack_num=0, payload=ss test. This lo, checksum=1793)
+sent ACK: 2 to ('127.0.0.1', 9100)
+delivering 2 to the upper layer
+current window: 3 - 4
+printing the extracted packet: Packet(seq_num=3, ack_num=0, payload=nger payload is , checksum=1837)
+sent ACK: 3 to ('127.0.0.1', 9100)
+delivering 3 to the upper layer
+current window: 4 - 5
+printing the extracted packet: Packet(seq_num=4, ack_num=0, payload=split across man, checksum=1935)
+sent ACK: 4 to ('127.0.0.1', 9100)
+delivering 4 to the upper layer
+current window: 5 - 6
+printing the extracted packet: Packet(seq_num=5, ack_num=0, payload=y packets while , checksum=1850)
+sent ACK: 5 to ('127.0.0.1', 9100)
+delivering 5 to the upper layer
+current window: 6 - 7
+printing the extracted packet: Packet(seq_num=6, ack_num=0, payload=bidirectional de, checksum=1953)
+ignoring corrupt packet 6
+current window: 6 - 7
+printing the extracted packet: Packet(seq_num=6, ack_num=0, payload=bidirectional de, checksum=1952)
+sent ACK: 6 to ('127.0.0.1', 9100)
+delivering 6 to the upper layer
+current window: 7 - 8
+printing the extracted packet: Packet(seq_num=7, ack_num=0, payload=lay, jitter, los, checksum=1821)
+sent ACK: 7 to ('127.0.0.1', 9100)
+delivering 7 to the upper layer
+current window: 8 - 9
+printing the extracted packet: Packet(seq_num=7, ack_num=0, payload=lay, jitter, los, checksum=1821)
+sent ACK: 7 to ('127.0.0.1', 9100)
+current window: 8 - 9
+printing the extracted packet: Packet(seq_num=8, ack_num=0, payload=s, corruption, d, checksum=1828)
+sent ACK: 8 to ('127.0.0.1', 9100)
+delivering 8 to the upper layer
+current window: 9 - 10
+printing the extracted packet: Packet(seq_num=9, ack_num=0, payload=uplication, and , checksum=1848)
+sent ACK: 9 to ('127.0.0.1', 9100)
+delivering 9 to the upper layer
+current window: 10 - 11
+printing the extracted packet: Packet(seq_num=10, ack_num=0, payload=reordering are a, checksum=1939)
+sent ACK: 10 to ('127.0.0.1', 9100)
+delivering 10 to the upper layer
+current window: 11 - 12
+printing the extracted packet: Packet(seq_num=11, ack_num=0, payload=pplied. Rigorous, checksum=1968)
+sent ACK: 11 to ('127.0.0.1', 9100)
+delivering 11 to the upper layer
+current window: 12 - 13
+printing the extracted packet: Packet(seq_num=12, ack_num=0, payload= reliable UDP pr, checksum=1782)
+sent ACK: 12 to ('127.0.0.1', 9100)
+delivering 12 to the upper layer
+current window: 13 - 14
+printing the extracted packet: Packet(seq_num=13, ack_num=0, payload=oxy stress test., checksum=1982)
+sent ACK: 13 to ('127.0.0.1', 9100)
+delivering 13 to the upper layer
+current window: 14 - 15
+printing the extracted packet: Packet(seq_num=14, ack_num=0, payload= This longer pay, checksum=1878)
+sent ACK: 14 to ('127.0.0.1', 9100)
+delivering 14 to the upper layer
+current window: 15 - 16
+printing the extracted packet: Packet(seq_num=15, ack_num=0, payload=load is split ac, checksum=1882)
+sent ACK: 15 to ('127.0.0.1', 9100)
+delivering 15 to the upper layer
+current window: 16 - 17
+printing the extracted packet: Packet(seq_num=16, ack_num=0, payload=ross many packet, checksum=1987)
+sent ACK: 16 to ('127.0.0.1', 9100)
+delivering 16 to the upper layer
+current window: 17 - 18
+printing the extracted packet: Packet(seq_num=17, ack_num=0, payload=s while bidirect, checksum=1954)
+sent ACK: 17 to ('127.0.0.1', 9100)
+delivering 17 to the upper layer
+current window: 18 - 19
+printing the extracted packet: Packet(seq_num=17, ack_num=0, payload=s while bidirect, checksum=1954)
+sent ACK: 17 to ('127.0.0.1', 9100)
+current window: 18 - 19
+printing the extracted packet: Packet(seq_num=18, ack_num=0, payload=ional delay, jit, checksum=1894)
+sent ACK: 18 to ('127.0.0.1', 9100)
+delivering 18 to the upper layer
+current window: 19 - 20
+printing the extracted packet: Packet(seq_num=19, ack_num=0, payload=ter, loss, corru, checksum=1889)
+sent ACK: 19 to ('127.0.0.1', 9100)
+delivering 19 to the upper layer
+current window: 20 - 21
+printing the extracted packet: Packet(seq_num=20, ack_num=0, payload=ption, duplicati, checksum=1983)
+sent ACK: 20 to ('127.0.0.1', 9100)
+delivering 20 to the upper layer
+current window: 21 - 22
+printing the extracted packet: Packet(seq_num=21, ack_num=0, payload=on, and reorderi, checksum=1892)
+ignoring corrupt packet 21
+current window: 21 - 22
+printing the extracted packet: Packet(seq_num=21, ack_num=0, payload=on, and reorderi, checksum=1891)
+sent ACK: 21 to ('127.0.0.1', 9100)
+delivering 21 to the upper layer
+current window: 22 - 23
+printing the extracted packet: Packet(seq_num=22, ack_num=0, payload=ng are applied. , checksum=1798)
+sent ACK: 22 to ('127.0.0.1', 9100)
+delivering 22 to the upper layer
+current window: 23 - 24
+printing the extracted packet: Packet(seq_num=22, ack_num=0, payload=ng are applied. , checksum=1798)
+sent ACK: 22 to ('127.0.0.1', 9100)
+current window: 23 - 24
+printing the extracted packet: Packet(seq_num=23, ack_num=0, payload=Rigorous reliabl, checksum=2018)
+sent ACK: 23 to ('127.0.0.1', 9100)
+delivering 23 to the upper layer
+current window: 24 - 25
+printing the extracted packet: Packet(seq_num=24, ack_num=0, payload=e UDP proxy stre, checksum=1852)
+sent ACK: 24 to ('127.0.0.1', 9100)
+delivering 24 to the upper layer
+current window: 25 - 26
+printing the extracted packet: Packet(seq_num=25, ack_num=0, payload=ss test. This lo, checksum=1846)
+sent ACK: 25 to ('127.0.0.1', 9100)
+delivering 25 to the upper layer
+current window: 26 - 27
+printing the extracted packet: Packet(seq_num=25, ack_num=0, payload=ss test. This lo, checksum=1846)
+sent ACK: 25 to ('127.0.0.1', 9100)
+current window: 26 - 27
+printing the extracted packet: Packet(seq_num=26, ack_num=0, payload=nger payload is , checksum=1890)
+sent ACK: 26 to ('127.0.0.1', 9100)
+delivering 26 to the upper layer
+current window: 27 - 28
+printing the extracted packet: Packet(seq_num=27, ack_num=0, payload=split across man, checksum=1988)
+sent ACK: 27 to ('127.0.0.1', 9100)
+delivering 27 to the upper layer
+current window: 28 - 29
+printing the extracted packet: Packet(seq_num=28, ack_num=0, payload=y packets while , checksum=1903)
+sent ACK: 28 to ('127.0.0.1', 9100)
+delivering 28 to the upper layer
+current window: 29 - 30
+printing the extracted packet: Packet(seq_num=29, ack_num=0, payload=bidirectional de, checksum=2005)
+sent ACK: 29 to ('127.0.0.1', 9100)
+delivering 29 to the upper layer
+current window: 30 - 31
+printing the extracted packet: Packet(seq_num=30, ack_num=0, payload=lay, jitter, los, checksum=1865)
+sent ACK: 30 to ('127.0.0.1', 9100)
+delivering 30 to the upper layer
+current window: 31 - 32
+printing the extracted packet: Packet(seq_num=31, ack_num=0, payload=s, corruption, d, checksum=1872)
+sent ACK: 31 to ('127.0.0.1', 9100)
+delivering 31 to the upper layer
+current window: 32 - 33
+printing the extracted packet: Packet(seq_num=32, ack_num=0, payload=uplication, and , checksum=1892)
+sent ACK: 32 to ('127.0.0.1', 9100)
+delivering 32 to the upper layer
+current window: 33 - 34
+printing the extracted packet: Packet(seq_num=33, ack_num=0, payload=reordering are a, checksum=1944)
+sent ACK: 33 to ('127.0.0.1', 9100)
+delivering 33 to the upper layer
+current window: 34 - 35
+printing the extracted packet: Packet(seq_num=34, ack_num=0, payload=pplied. Rigorous, checksum=1973)
+sent ACK: 34 to ('127.0.0.1', 9100)
+delivering 34 to the upper layer
+current window: 35 - 36
+printing the extracted packet: Packet(seq_num=35, ack_num=0, payload= reliable UDP pr, checksum=1787)
+sent ACK: 35 to ('127.0.0.1', 9100)
+delivering 35 to the upper layer
+current window: 36 - 37
+printing the extracted packet: Packet(seq_num=36, ack_num=0, payload=oxy stress test., checksum=1987)
+sent ACK: 36 to ('127.0.0.1', 9100)
+delivering 36 to the upper layer
+current window: 37 - 38
+printing the extracted packet: Packet(seq_num=37, ack_num=0, payload= This longer pay, checksum=1884)
+ignoring corrupt packet 37
+current window: 37 - 38
+printing the extracted packet: Packet(seq_num=37, ack_num=0, payload= This longer pay, checksum=1883)
+sent ACK: 37 to ('127.0.0.1', 9100)
+delivering 37 to the upper layer
+current window: 38 - 39
+printing the extracted packet: Packet(seq_num=38, ack_num=0, payload=load is split ac, checksum=1887)
+sent ACK: 38 to ('127.0.0.1', 9100)
+delivering 38 to the upper layer
+current window: 39 - 40
+printing the extracted packet: Packet(seq_num=39, ack_num=0, payload=ross many packet, checksum=1992)
+sent ACK: 39 to ('127.0.0.1', 9100)
+delivering 39 to the upper layer
+current window: 40 - 41
+printing the extracted packet: Packet(seq_num=40, ack_num=0, payload=s while bidirect, checksum=1950)
+sent ACK: 40 to ('127.0.0.1', 9100)
+delivering 40 to the upper layer
+current window: 41 - 42
+printing the extracted packet: Packet(seq_num=41, ack_num=0, payload=ional delay, jit, checksum=1891)
+ignoring corrupt packet 41
+current window: 41 - 42
+printing the extracted packet: Packet(seq_num=41, ack_num=0, payload=ional delay, jit, checksum=1890)
+sent ACK: 41 to ('127.0.0.1', 9100)
+delivering 41 to the upper layer
+current window: 42 - 43
+printing the extracted packet: Packet(seq_num=42, ack_num=0, payload=ter, loss, corru, checksum=1885)
+sent ACK: 42 to ('127.0.0.1', 9100)
+delivering 42 to the upper layer
+current window: 43 - 44
+printing the extracted packet: Packet(seq_num=43, ack_num=0, payload=ption, duplicati, checksum=1988)
+sent ACK: 43 to ('127.0.0.1', 9100)
+delivering 43 to the upper layer
+current window: 44 - 45
+printing the extracted packet: Packet(seq_num=44, ack_num=0, payload=on, and reorderi, checksum=1896)
+sent ACK: 44 to ('127.0.0.1', 9100)
+delivering 44 to the upper layer
+current window: 45 - 46
+printing the extracted packet: Packet(seq_num=45, ack_num=0, payload=ng are applied. , checksum=1803)
+sent ACK: 45 to ('127.0.0.1', 9100)
+delivering 45 to the upper layer
+current window: 46 - 47
+printing the extracted packet: Packet(seq_num=45, ack_num=0, payload=ng are applied. , checksum=1803)
+sent ACK: 45 to ('127.0.0.1', 9100)
+current window: 46 - 47

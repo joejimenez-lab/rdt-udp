@@ -152,6 +152,15 @@ scripts/run_preset_tests.py --iface eth0 --host 192.168.1.20
 scripts/summarize_results.py 20260505_202004
 ```
 
+For environments without Linux `tc`, the local impairment proxy can run the
+combined and rigorous saved-log scenarios:
+
+```bash
+scripts/run_proxy_tests.py
+scripts/run_proxy_tests.py --tests all_tests
+scripts/run_proxy_tests.py --tests rigorous_test
+```
+
 The default run and menu `all` option run the normal presets only. They do not
 include the extreme test.
 
@@ -160,7 +169,9 @@ corruption, 2% duplication, 5% reordering, window size 4, and a larger file
 input.
 
 A Bash runner is also available at `scripts/sender_linux_trials.sh` for the same
-basic preset workflow.
+basic preset workflow. The proxy runner is deterministic and writes the same
+sender/receiver log pair shape under `linux_test_results/`, but it does not use
+Linux `tc`.
 
 ## Test Results
 
@@ -175,10 +186,16 @@ log and a matching receiver log.
 | 2% corruption | Pass | 11 | 11 | 0 | 0 | 11 |
 | 10% corruption | Pass | 11 | 13 | 2 | 2 | 11 |
 | Window size 4 | Pass | 11 | 11 | 0 | 0 | 11 |
+| All impairments proxy | Pass | 17 | 59 | 42 | 42 | 17 |
+| Rigorous proxy stress | Pass | 46 | 62 | 16 | 16 | 49 |
 
 The loss and corruption runs show the main recovery behavior: packets or ACKs
 were dropped/corrupted, the sender timed out, retransmitted the missing packet,
 and still completed the transfer.
+
+The two proxy rows combine delay, jitter, loss, corruption, duplication, and
+reordering in one run. The rigorous proxy stress run also received 3 corrupt ACKs
+that were ignored after checksum validation.
 
 ## Current Limitations
 

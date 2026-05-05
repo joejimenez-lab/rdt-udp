@@ -1,0 +1,152 @@
+=== all_tests ===
+Proxy impairment: delay=100ms jitter=20ms loss=5% corrupt=2% duplicate=1% reorder=2% seed=547001
+Command: /Library/Frameworks/Python.framework/Versions/3.10/bin/python3 /Volumes/M2external/rdt-udp/rdt-udp/sender.py --host 127.0.0.1 --port 9100 --timeout 0.75 --payload-size 8 --window-size 4 --max-retries 40 --message Reliable UDP all-tests proxy run with delay, jitter, packet loss, corruption, duplication, reordering, and a sliding sender window.
+[SENDER] sending 17 packet(s) to ('127.0.0.1', 9100) with window=4
+[SENDER] sending seq=0, attempt=1
+[SENDER] sending seq=1, attempt=1
+[SENDER] sending seq=2, attempt=1
+[SENDER] sending seq=3, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=0, payload=, checksum=344)
+[SENDER] ACK ok for seq=0
+[SENDER] sending seq=4, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=1, payload=, checksum=345)
+[SENDER] ACK ok for seq=1
+[SENDER] sending seq=5, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=2, resending
+[SENDER] sending seq=2, attempt=2
+[SENDER] timeout on seq=3, resending
+[SENDER] sending seq=3, attempt=2
+[SENDER] timeout on seq=4, resending
+[SENDER] sending seq=4, attempt=2
+[SENDER] timeout on seq=5, resending
+[SENDER] sending seq=5, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=2, payload=, checksum=346)
+[SENDER] ACK ok for seq=2
+[SENDER] sending seq=6, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=3, resending
+[SENDER] sending seq=3, attempt=3
+[SENDER] timeout on seq=4, resending
+[SENDER] sending seq=4, attempt=3
+[SENDER] timeout on seq=5, resending
+[SENDER] sending seq=5, attempt=3
+[SENDER] timeout on seq=6, resending
+[SENDER] sending seq=6, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=3, payload=, checksum=347)
+[SENDER] ACK ok for seq=3
+[SENDER] sending seq=7, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=4, resending
+[SENDER] sending seq=4, attempt=4
+[SENDER] timeout on seq=5, resending
+[SENDER] sending seq=5, attempt=4
+[SENDER] timeout on seq=6, resending
+[SENDER] sending seq=6, attempt=3
+[SENDER] timeout on seq=7, resending
+[SENDER] sending seq=7, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=4, payload=, checksum=348)
+[SENDER] ACK ok for seq=4
+[SENDER] sending seq=8, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=5, resending
+[SENDER] sending seq=5, attempt=5
+[SENDER] timeout on seq=6, resending
+[SENDER] sending seq=6, attempt=4
+[SENDER] timeout on seq=7, resending
+[SENDER] sending seq=7, attempt=3
+[SENDER] timeout on seq=8, resending
+[SENDER] sending seq=8, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=5, payload=, checksum=349)
+[SENDER] ACK ok for seq=5
+[SENDER] sending seq=9, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=6, payload=, checksum=350)
+[SENDER] ACK ok for seq=6
+[SENDER] sending seq=10, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=7, resending
+[SENDER] sending seq=7, attempt=4
+[SENDER] timeout on seq=8, resending
+[SENDER] sending seq=8, attempt=3
+[SENDER] timeout on seq=9, resending
+[SENDER] sending seq=9, attempt=2
+[SENDER] timeout on seq=10, resending
+[SENDER] sending seq=10, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=7, payload=, checksum=351)
+[SENDER] ACK ok for seq=7
+[SENDER] sending seq=11, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=8, payload=, checksum=352)
+[SENDER] ACK ok for seq=8
+[SENDER] sending seq=12, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=9, resending
+[SENDER] sending seq=9, attempt=3
+[SENDER] timeout on seq=10, resending
+[SENDER] sending seq=10, attempt=3
+[SENDER] timeout on seq=11, resending
+[SENDER] sending seq=11, attempt=2
+[SENDER] timeout on seq=12, resending
+[SENDER] sending seq=12, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=9, payload=, checksum=353)
+[SENDER] ACK ok for seq=9
+[SENDER] sending seq=13, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=10, resending
+[SENDER] sending seq=10, attempt=4
+[SENDER] timeout on seq=11, resending
+[SENDER] sending seq=11, attempt=3
+[SENDER] timeout on seq=12, resending
+[SENDER] sending seq=12, attempt=3
+[SENDER] timeout on seq=13, resending
+[SENDER] sending seq=13, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=10, payload=, checksum=393)
+[SENDER] ACK ok for seq=10
+[SENDER] sending seq=14, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=11, resending
+[SENDER] sending seq=11, attempt=4
+[SENDER] timeout on seq=12, resending
+[SENDER] sending seq=12, attempt=4
+[SENDER] timeout on seq=13, resending
+[SENDER] sending seq=13, attempt=3
+[SENDER] timeout on seq=14, resending
+[SENDER] sending seq=14, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=11, payload=, checksum=394)
+[SENDER] ACK ok for seq=11
+[SENDER] sending seq=15, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=12, resending
+[SENDER] sending seq=12, attempt=5
+[SENDER] timeout on seq=13, resending
+[SENDER] sending seq=13, attempt=4
+[SENDER] timeout on seq=14, resending
+[SENDER] sending seq=14, attempt=3
+[SENDER] timeout on seq=15, resending
+[SENDER] sending seq=15, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=12, payload=, checksum=395)
+[SENDER] ACK ok for seq=12
+[SENDER] sending seq=16, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=13, resending
+[SENDER] sending seq=13, attempt=5
+[SENDER] timeout on seq=14, resending
+[SENDER] sending seq=14, attempt=4
+[SENDER] timeout on seq=15, resending
+[SENDER] sending seq=15, attempt=3
+[SENDER] timeout on seq=16, resending
+[SENDER] sending seq=16, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=13, payload=, checksum=396)
+[SENDER] ACK ok for seq=13
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=14, payload=, checksum=397)
+[SENDER] ACK ok for seq=14
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=15, resending
+[SENDER] sending seq=15, attempt=4
+[SENDER] timeout on seq=16, resending
+[SENDER] sending seq=16, attempt=3
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=15, payload=, checksum=398)
+[SENDER] ACK ok for seq=15
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=16, payload=, checksum=399)
+[SENDER] ACK ok for seq=16
+[SENDER] complete: SenderStats(original_packets=17, packets_sent=59, retransmissions=42, timeouts=42, acks_received=17, bad_ack_checksums=0, malformed_acks=0, unexpected_acks=0)
+RESULT_STATUS=0

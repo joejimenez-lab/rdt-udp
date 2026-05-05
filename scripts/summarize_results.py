@@ -102,7 +102,7 @@ def parse_stats(line):
 def scenario_from_sender_log(path):
     match = SENDER_LOG_RE.match(path.name)
     if not match:
-        return path.stem, ""
+        return path.stem.removesuffix("_sender"), ""
     return match.group("scenario"), match.group("trial")
 
 
