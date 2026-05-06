@@ -3,7 +3,7 @@ from packet import Packet, convert_to_bytes, extract_from_bytes
 from utils import calculate_checksum
 
 class Receiver:
-    def __init__(self, host, port, window_size=1):
+    def __init__(self, host, port, window_size=10):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.s.bind((host, port))
         self.window_size = window_size
