@@ -1,7 +1,7 @@
 def calculate_checksum(seq_num, ack_num, payload, use_crc=True):
     if use_crc:
         # Following 6.2.3 of the textbook
-        generator = '1001'
+        generator = '111010101'
         data_str = f"{seq_num}|{ack_num}|{payload}"
         data_as_binary_str = string_to_binary(data_str)
         data_as_binary_str = data_as_binary_str + ('0' * (len(generator)-1))
