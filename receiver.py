@@ -53,5 +53,5 @@ class Receiver:
             else:
                 continue
 
-recv = Receiver('localhost', 9000)
+recv = Receiver('0.0.0.0', 9000)
 recv.start()
