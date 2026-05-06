@@ -1,4 +1,4 @@
-def calculate_checksum(seq_num, ack_num, payload, use_crc=False):
+def calculate_checksum(seq_num, ack_num, payload, use_crc=True):
     if use_crc:
         # Following 6.2.3 of the textbook
         generator = '1001'
