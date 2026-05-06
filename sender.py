@@ -26,6 +26,7 @@
 import argparse
 import socket
 import time
+import random
 from dataclasses import dataclass
 
 from packet import Packet, convert_to_bytes, extract_from_bytes
@@ -119,6 +120,37 @@ class Sender:
                 if next_to_send in states:
                     self._send_packet(states[next_to_send])
                 next_to_send += 1
+
+            ack_num = self._receive_ack()
+            if ack_num in states:
+                print(f"[SENDER] ACK ok for seq={ack_num}")
+                del states[ack_num]
+            elif ack_num is not None:
+                self.stats.unexpected_acks += 1
+                print(f"[SENDER] duplicate/out-of-window ACK ignored: {ack_num}")
+
+            self._retransmit_timed_out_packets(states, window_base, window_limit)
+
+    def _send_packets_randomized(self, packets):
+        self.stats.original_packets += len(packets)
+        random.shuffle(packets)
+        states = {
+            packet.seq_num: {
+                "packet": packet,
+                "attempts": 0,
+                "last_sent": None,
+            }
+            for packet in packets
+        }
+
+        while states:
+            window_base = min(states)
+            window_limit = window_base + self.window_size
+
+            for packet in packets:
+                if packet.seq_num in states:
+                    if states[packet.seq_num]["last_sent"] is None:
+                        self._send_packet(states[packet.seq_num])
 
             ack_num = self._receive_ack()
             if ack_num in states:
