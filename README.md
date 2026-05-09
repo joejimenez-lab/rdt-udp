@@ -1,56 +1,53 @@
 # Reliable Data Transfer over UDP
 
-This project implements a small reliable data transfer protocol on top of UDP in
-Python. UDP by itself does not guarantee delivery, ordering, duplicate
-protection, or corruption detection, so the sender and receiver add those pieces
-at the application layer.
+This project implements reliable data transfer on top of UDP in Python for
+CS 5470 Computer Networks. UDP does not guarantee delivery, ordering, duplicate
+protection, or corruption detection, so this project adds those mechanisms at
+the application layer.
 
-The project starts from stop-and-wait behavior and extends it with packet
-checksums, ACK validation, timeout-based retransmission, message packetization,
-and configurable sender window size. The packet format is intentionally simple
-so the protocol state is easy to inspect while testing.
+The protocol supports stop-and-wait and a configurable sender window. It uses
+sequence numbers, ACKs, CRC checksums, receiver buffering, timeout-based
+retransmission, and retry limits.
 
-## Protocol
+## Protocol Summary
 
-Packets are encoded as text:
+Packets use a readable text format for debugging:
 
 ```text
 seq_num|ack_num|payload|checksum
 ```
 
-The fields are:
+- `seq_num`: data packet sequence number
+- `ack_num`: sequence number being acknowledged
+- `payload`: message data, empty for ACKs
+- `checksum`: CRC over `seq_num`, `ack_num`, and `payload`
 
-- `seq_num`: sequence number for data ordering.
-- `ack_num`: sequence number being acknowledged.
-- `payload`: message data carried by the packet.
-- `checksum`: checksum over `seq_num`, `ack_num`, and `payload`.
+The sender splits a message into payload-sized chunks, sends packets inside the
+current sender window, tracks unacknowledged packets, and retransmits timed-out
+packets. The receiver validates CRCs, sends ACKs, buffers valid in-window
+packets, and delivers data upward only in sequence order.
 
-The sender splits a message into payload-sized chunks, assigns sequence numbers,
-computes checksums, sends packets over UDP, and waits for matching ACKs. If an
-ACK is missing, malformed, corrupt, or outside the active sender state, the
-sender ignores it and relies on timeout retransmission.
-
-The receiver validates incoming data checksums before sending an ACK. Valid
-packets inside the receiver window are acknowledged and delivered in sequence.
-Duplicate packets that were already acknowledged can be ACKed again so the
-sender can recover when an earlier ACK was lost.
-
-## Files
+## Repository Layout
 
 ```text
 .
-├── sender.py              # Sender, retransmission logic, CLI options
-├── receiver.py            # UDP receiver, checksum checks, ACK generation
-├── packet.py              # Packet object and byte conversion helpers
-├── utils.py               # Checksum and CRC helper functions
+├── sender.py                  # Sender, window logic, ACK handling, retries
+├── receiver.py                # UDP receiver, CRC validation, ACK generation
+├── packet.py                  # Packet object and byte conversion helpers
+├── utils.py                   # CRC/checksum helpers
 ├── scripts/
-│   ├── tc_netem.sh        # Linux tc/netem helper for delay/loss/corruption
-│   └── sender_linux_trials.sh
-├── linux_test_results/    # Saved sender and receiver logs from test runs
-└── Docs/                  # Proposal, progress report, and report draft
+│   ├── run_preset_tests.py    # Linux tc netem preset runner
+│   ├── run_proxy_tests.py     # Deterministic UDP impairment proxy tests
+│   ├── summarize_results.py   # Log summary helper
+│   ├── tc_netem.sh            # Linux tc netem wrapper
+│   └── sender_linux_trials.sh # Older Linux trial runner
+├── linux_test_results/        # Raw experimental results and brief READMEs
+└── Docs/
+    ├── Papers/                # Proposal, progress report, final report tex
+    └── Slides/                # Final presentation PDF
 ```
 
-## Running Locally
+## Running Manually
 
 Start the receiver in one terminal:
 
@@ -64,148 +61,100 @@ Run the sender in another terminal:
 python3 sender.py --message "hello reliable udp" --max-retries 5
 ```
 
-Run a multi-packet transfer by lowering the payload size:
-
-```bash
-python3 sender.py \
-  --message "this message is split into several reliable udp packets" \
-  --payload-size 8 \
-  --max-retries 5
-```
-
-Run with a larger sender window:
+Send a multi-packet message:
 
 ```bash
 python3 sender.py \
   --message "testing a larger sender window" \
-  --payload-size 8 \
-  --window-size 4 \
+  --payload-size 4 \
+  --window-size 10 \
   --max-retries 5
 ```
 
-For separate manual sender runs, restart the receiver between runs. The receiver
-keeps its current expected sequence number in memory, while each new sender
-process starts sequence numbers from zero.
+For independent manual runs, restart the receiver. The receiver keeps
+`expected_seq_num` in memory, while a new sender process starts at sequence 0.
 
-## Linux Network Testing
+## Test Scripts
 
-The `scripts/tc_netem.sh` helper uses Linux `tc netem` to simulate delay, packet
-loss, corruption, duplication, and reordering. It usually needs `sudo`.
+Linux `tc netem` preset tests:
 
-Apply 100 ms delay:
+```bash
+python3 scripts/run_preset_tests.py --menu
+python3 scripts/run_preset_tests.py --list
+python3 scripts/run_preset_tests.py --tests baseline loss_5_percent
+python3 scripts/run_preset_tests.py --tests extreme_test
+```
+
+The `tc_netem.sh` helper can also be used directly on Linux:
 
 ```bash
 DELAY=100ms LOSS=0% CORRUPT=0% scripts/tc_netem.sh apply
-```
-
-Apply 5% packet loss:
-
-```bash
-DELAY=0ms LOSS=5% CORRUPT=0% scripts/tc_netem.sh apply
-```
-
-Apply 10% corruption:
-
-```bash
-DELAY=0ms LOSS=0% CORRUPT=10% scripts/tc_netem.sh apply
-```
-
-Check and clear the active rule:
-
-```bash
 scripts/tc_netem.sh show
 scripts/tc_netem.sh clear
 ```
 
-The Python preset runner starts a fresh receiver for each trial, applies the
-network condition, runs one sender transfer, saves sender and receiver logs, then
-clears the network rule:
+Proxy-based impairment tests, useful when Linux `tc netem` is not available:
 
 ```bash
-scripts/run_preset_tests.py --menu
+python3 scripts/run_proxy_tests.py
+python3 scripts/run_proxy_tests.py --tests all_tests
+python3 scripts/run_proxy_tests.py --tests rigorous_test
 ```
 
-Each run is saved under its own folder:
+## Raw Experimental Results
+
+Raw logs are organized under `linux_test_results/`. Each subfolder has its own
+short `README.md`.
 
 ```text
-results/YYYYMMDD_HHMMSS/
+linux_test_results/
+├── 01_two_terminal_manual_demo/
+├── 02_tc_netem_preset_tests/
+├── 03_proxy_impairment_tests/
+├── 04_limit_failure_test/
+├── 05_loss_threshold_test/
+└── 06_timeout_threshold_test/
 ```
 
-After a run finishes, summarize it with:
-
-```bash
-scripts/summarize_results.py
-```
-
-The summary script asks for a run id or lets you select the latest run, then
-prints the important sender statistics and a compact result table.
-
-Useful options:
-
-```bash
-scripts/run_preset_tests.py --list
-scripts/run_preset_tests.py
-scripts/run_preset_tests.py --tests baseline loss_5_percent
-scripts/run_preset_tests.py --tests extreme_test
-scripts/run_preset_tests.py --trials 3 --payload-size 8
-scripts/run_preset_tests.py --iface eth0 --host 192.168.1.20
-scripts/summarize_results.py 20260505_202004
-```
-
-For environments without Linux `tc`, the local impairment proxy can run the
-combined and rigorous saved-log scenarios:
-
-```bash
-scripts/run_proxy_tests.py
-scripts/run_proxy_tests.py --tests all_tests
-scripts/run_proxy_tests.py --tests rigorous_test
-```
-
-The default run and menu `all` option run the normal presets only. They do not
-include the extreme test.
-
-Menu option `7`, `extreme_test`, combines 100 ms delay, 20 ms jitter, 10% loss, 5%
-corruption, 2% duplication, 5% reordering, window size 4, and a larger file
-input.
-
-A Bash runner is also available at `scripts/sender_linux_trials.sh` for the same
-basic preset workflow. The proxy runner is deterministic and writes the same
-sender/receiver log pair shape under `linux_test_results/`, but it does not use
-Linux `tc`.
-
-## Test Results
-
-Saved logs are included under `linux_test_results/`. Each scenario has a sender
-log and a matching receiver log.
+Summary of final runs:
 
 | Scenario | Result | Original packets | Packets sent | Retransmissions | Timeouts | ACKs received |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| Manual two-terminal demo | Pass | 8 | 8 | 0 | 0 | 8 |
 | Baseline | Pass | 10 | 10 | 0 | 0 | 10 |
 | 100 ms delay | Pass | 10 | 10 | 0 | 0 | 10 |
 | 5% packet loss | Pass | 10 | 12 | 2 | 2 | 10 |
 | 2% corruption | Pass | 11 | 11 | 0 | 0 | 11 |
 | 10% corruption | Pass | 11 | 13 | 2 | 2 | 11 |
-| Window size 4 | Pass | 11 | 11 | 0 | 0 | 11 |
-| All impairments proxy | Pass | 17 | 59 | 42 | 42 | 17 |
-| Rigorous proxy stress | Pass | 46 | 62 | 16 | 16 | 49 |
+| Window size 4 baseline | Pass | 11 | 11 | 0 | 0 | 11 |
+| 100 ms delay + 5% loss | Pass | 8 | 9 | 1 | 1 | 8 |
+| Extreme tc netem test | Pass | 29 | 46 | 17 | 17 | 29 |
+| Proxy all_tests | Pass | 17 | 59 | 42 | 42 | 17 |
+| Proxy rigorous_test | Pass | 46 | 62 | 16 | 16 | 49 |
+| 100% loss stress | Fail by design | 8 | - | - | - | 0 |
+| 70% loss stress | Fail by design | 9 | - | - | - | 0 |
+| 500 ms delay / 100 ms timeout | Fail by design | 10 | - | - | - | 0 |
 
-The loss and corruption runs show the main recovery behavior: packets or ACKs
-were dropped/corrupted, the sender timed out, retransmitted the missing packet,
-and still completed the transfer.
+The stress failures are intentional limitation tests. They show that when loss
+or delay exceeds the configured retry/timeout budget, the sender raises
+`TimeoutError` instead of hanging forever.
 
-The two proxy rows combine delay, jitter, loss, corruption, duplication, and
-reordering in one run. The rigorous proxy stress run also received 3 corrupt ACKs
-that were ignored after checksum validation.
+## Reports and Presentation
+
+- Final report source: `Docs/Papers/finaReport.tex`
+- Progress report source: `Docs/Papers/ProgressReport.tex`
+- Proposal PDF: `Docs/Papers/CS5470_Proposal.pdf`
+- Final presentation PDF: `Docs/Slides/Final Presentatiomn - CS5470 (2).pdf`
 
 ## Current Limitations
 
-- The packet format is text-based and uses `|` as a separator, so payloads cannot
+- Packet encoding is text-based and uses `|` as a separator, so payloads cannot
   contain `|`.
-- Receiver runtime options are not yet exposed through command-line arguments.
-- Receiver state is per process. Restart the receiver for independent manual test
-  runs that start sender sequence numbers at zero.
-- The implementation demonstrates reliable transfer behavior for this project,
-  but it is not a production transport protocol.
+- The receiver does not expose host, port, or window size through CLI arguments.
+- Timeout and retry values are fixed by configuration; adaptive RTT-based
+  timeout estimation is future work.
+- This is a project implementation for inspecting reliable transport behavior,
+  not a production transport protocol.
 
 ## Authors
 
