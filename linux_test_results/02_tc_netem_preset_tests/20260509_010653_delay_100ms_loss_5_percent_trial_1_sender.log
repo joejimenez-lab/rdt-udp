@@ -1,0 +1,29 @@
+[SENDER] sending 8 packet(s) to ('127.0.0.1', 9000) with window=1
+[SENDER] sending seq=0, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=0, payload=, checksum=68)
+[SENDER] ACK ok for seq=0
+[SENDER] sending seq=1, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=1, payload=, checksum=79)
+[SENDER] ACK ok for seq=1
+[SENDER] sending seq=2, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=2, payload=, checksum=82)
+[SENDER] ACK ok for seq=2
+[SENDER] sending seq=3, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=3, payload=, checksum=89)
+[SENDER] ACK ok for seq=3
+[SENDER] sending seq=4, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=4, payload=, checksum=104)
+[SENDER] ACK ok for seq=4
+[SENDER] sending seq=5, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=5, payload=, checksum=99)
+[SENDER] ACK ok for seq=5
+[SENDER] sending seq=6, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=6, resending
+[SENDER] sending seq=6, attempt=2
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=6, payload=, checksum=126)
+[SENDER] ACK ok for seq=6
+[SENDER] sending seq=7, attempt=1
+[SENDER] received ACK packet: Packet(seq_num=0, ack_num=7, payload=, checksum=117)
+[SENDER] ACK ok for seq=7
+[SENDER] complete: SenderStats(original_packets=8, packets_sent=9, retransmissions=1, timeouts=1, acks_received=8, bad_ack_checksums=0, malformed_acks=0, unexpected_acks=0)

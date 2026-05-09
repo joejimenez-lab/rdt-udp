@@ -1,0 +1,9 @@
+Receiver started...
+current window: 0 - 10
+printing the extracted packet: Packet(seq_num=0, ack_num=0, payload=Intentio, checksum=186)
+sent ACK: 0 to ('127.0.0.1', 54234)
+delivering 0 to the upper layer
+current window: 1 - 11
+printing the extracted packet: Packet(seq_num=0, ack_num=0, payload=Intentio, checksum=186)
+sent ACK: 0 to ('127.0.0.1', 54234)
+current window: 1 - 11

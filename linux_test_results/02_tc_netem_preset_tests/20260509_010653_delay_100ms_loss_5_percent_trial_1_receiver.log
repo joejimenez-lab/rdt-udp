@@ -1,0 +1,34 @@
+Receiver started...
+current window: 0 - 10
+printing the extracted packet: Packet(seq_num=0, ack_num=0, payload=Reliable, checksum=14)
+sent ACK: 0 to ('127.0.0.1', 53204)
+delivering 0 to the upper layer
+current window: 1 - 11
+printing the extracted packet: Packet(seq_num=1, ack_num=0, payload= UDP net, checksum=92)
+sent ACK: 1 to ('127.0.0.1', 53204)
+delivering 1 to the upper layer
+current window: 2 - 12
+printing the extracted packet: Packet(seq_num=2, ack_num=0, payload=work tes, checksum=212)
+sent ACK: 2 to ('127.0.0.1', 53204)
+delivering 2 to the upper layer
+current window: 3 - 13
+printing the extracted packet: Packet(seq_num=3, ack_num=0, payload=t messag, checksum=46)
+sent ACK: 3 to ('127.0.0.1', 53204)
+delivering 3 to the upper layer
+current window: 4 - 14
+printing the extracted packet: Packet(seq_num=4, ack_num=0, payload=e split , checksum=84)
+sent ACK: 4 to ('127.0.0.1', 53204)
+delivering 4 to the upper layer
+current window: 5 - 15
+printing the extracted packet: Packet(seq_num=5, ack_num=0, payload=into sev, checksum=219)
+sent ACK: 5 to ('127.0.0.1', 53204)
+delivering 5 to the upper layer
+current window: 6 - 16
+printing the extracted packet: Packet(seq_num=6, ack_num=0, payload=eral chu, checksum=136)
+sent ACK: 6 to ('127.0.0.1', 53204)
+delivering 6 to the upper layer
+current window: 7 - 17
+printing the extracted packet: Packet(seq_num=7, ack_num=0, payload=nks., checksum=3)
+sent ACK: 7 to ('127.0.0.1', 53204)
+delivering 7 to the upper layer
+current window: 8 - 18

@@ -1,0 +1,57 @@
+\documentclass[12pt]{article}
+\usepackage[margin=0.6in]{geometry}
+\usepackage{titling}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\setlength{\droptitle}{-3em}
+
+\pretitle{\begin{center}\Large\bfseries}
+\posttitle{
+\par\end{center}
+\begin{center}
+{\small \href{https://github.com/joejimenez-lab/rdt-udp}{GitHub Link}}
+\end{center}
+\vspace{-1em}
+}
+\preauthor{\begin{center}\normalsize}
+\postauthor{\par\end{center}\vspace{-1em}}
+
+\predate{\begin{center}\normalsize}
+\postdate{\par\end{center}\vspace{-1em}}
+
+\title{Progress Report: Reliable Data Transfer Protocol over UDP}
+\author{Joe Jimenez, Alan Lam \\ CS 5470 Computer Networks}
+\date{April 24, 2026}
+
+\begin{document}
+\maketitle
+\noindent
+We are still in the early part of the implementation. We are starting with stop and wait over UDP before moving on to sliding windows and selective repeat. So far, we have the project is split into a few Python files for the sender, receiver, packet format, and helper functions. The packet format we are using right now is \texttt{seq\_num|ack\_num|payload|checksum}. It is not the final version, but it is easy to print and debug while we are still getting the basic communication working.
+
+\vspace{0.5em}
+\noindent
+\textbf{Work Completed So Far:}
+\subsection*{Sender}
+The sender is currently set up for the first version of the protocol, which is stop and wait. It creates a data packet with the current sequence number, sends it over UDP, and waits for an ACK from the receiver. If the ACK matches the packet's sequence number, the sender moves on to the next sequence number. If no ACK arrives before the timeout, the sender retransmits the same packet. This gives us the basic reliability behavior we need before adding more advanced features.
+
+The sender includes the fields needed for the rest of the project, including sequence numbers, ACK handling, payload data, and a checksum value. At this stage, the sender can calculate a checksum for outgoing data packets. The next sender side work is to validate checksums on incoming ACKs, support sending larger messages as multiple packets, and eventually replace stop and wait with a sliding window approach.
+
+
+
+\subsection*{Receiver}
+Currently, the receiver is set up to listen on localhost for local testing. When it receives a packet from the sender, it sends an ACK back to the sender, with the acknowledgment number equal to the sequence number.
+
+The next receiver-side work is to validate checksums on incoming messages from the sender and send ACKs for the last good sequence number to let the sender know about corrupted messages. Then the receiver will need to have a buffer for the sliding window.
+
+\vspace{0.5em}
+\noindent
+\textbf{Current Status and Testing.}
+The project is not fully complete yet. Most of our time so far has gone into setting up the sender logic and the shared packet format that both sides need to agree on. We still need to test the sender and receiver together. The next step is to run both programs and check the basic flow: the sender sends one packet, the receiver reads it, and an ACK comes back. After that, we need to test what happens when the ACK does not come back and make sure the sender resends the same packet.
+
+\vspace{0.5em}
+\noindent
+\textbf{Remaining Work.}
+Next, we need to add checksum checking, not just checksum generation. That needs to work for both data packets and ACK packets. After that, we want to split larger messages into multiple packets and make sure sequence numbers are handling ordering and duplicates correctly. Once stop and wait is reliable, we will move on to sliding windows and selective repeat so more than one packet can be in flight at the same time. We also still need to add tests for packet loss, corruption, and delay, then measure throughput, latency, and retransmissions.
+
+\end{document}

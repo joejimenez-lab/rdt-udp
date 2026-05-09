@@ -1,0 +1,27 @@
+[SENDER] sending 8 packet(s) to ('127.0.0.1', 9000) with window=1
+[SENDER] sending seq=0, attempt=1
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=0, resending
+[SENDER] sending seq=0, attempt=2
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=0, resending
+[SENDER] sending seq=0, attempt=3
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=0, resending
+[SENDER] sending seq=0, attempt=4
+[SENDER] receive timeout, checking retransmissions
+[SENDER] timeout on seq=0, resending
+Traceback (most recent call last):
+  File "/home/joe/SpringProject/rdt-udp/sender.py", line 337, in <module>
+    main()
+  File "/home/joe/SpringProject/rdt-udp/sender.py", line 331, in main
+    sender.send(_read_message(args))
+  File "/home/joe/SpringProject/rdt-udp/sender.py", line 93, in send
+    self._send_packets(packets)
+  File "/home/joe/SpringProject/rdt-udp/sender.py", line 132, in _send_packets
+    self._retransmit_timed_out_packets(states, window_base, window_limit)
+  File "/home/joe/SpringProject/rdt-udp/sender.py", line 224, in _retransmit_timed_out_packets
+    self._send_packet(states[seq_num])
+  File "/home/joe/SpringProject/rdt-udp/sender.py", line 171, in _send_packet
+    raise TimeoutError(
+TimeoutError: no valid ACK for seq=0 after 3 retransmission(s)

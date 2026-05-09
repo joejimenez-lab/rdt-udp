@@ -1,0 +1,2 @@
+qdisc netem 8084: root refcnt 2 limit 1000 delay 500ms
+Clearing netem on lo

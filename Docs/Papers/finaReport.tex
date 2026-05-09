@@ -1,0 +1,559 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+% Template version as of 6/27/2024
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    breakatwhitespace=true,
+    columns=fullflexible,
+    frame=single,
+    keepspaces=true,
+    showstringspaces=false
+}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Reliable Data Transfer Protocol over UDP\\
+{\footnotesize CS 5470 Computer Networks}
+}
+
+\author{
+\IEEEauthorblockN{Joe Jimenez}
+\IEEEauthorblockA{\textit{California State University, Los Angeles}\\
+Los Angeles, California}
+\and
+\IEEEauthorblockN{Alan Lam}
+\IEEEauthorblockA{\textit{California State University, Los Angeles}\\
+Los Angeles, California}
+}
+
+\maketitle
+
+\begin{abstract}
+UDP is useful when an application needs simple communication with little
+transport overhead, but it does not guarantee delivery, ordering, duplicate
+protection, or protection from corrupted data. This project implements a
+reliable data transfer protocol over UDP in Python. The protocol uses sequence
+numbers, acknowledgments, CRC checksums, timeouts, retransmission, message
+packetization, and a configurable sender window. The implementation was tested
+with local UDP sockets, Linux \texttt{tc netem}, and project scripts to observe
+the behavior under delay, packet loss, corruption, duplication, reordering, and
+configured retry and timeout limits.
+\end{abstract}
+
+\begin{IEEEkeywords}
+UDP, reliable data transfer, stop and wait, sliding window, checksum
+\end{IEEEkeywords}
+
+\section{Introduction}
+User Datagram Protocol (UDP) gives applications a small and fast transport
+interface, but it leaves reliability to the application. The sender does not
+automatically know whether the receiver accepted the data, and many applications
+that want UDP's low overhead still need ordered, uncorrupted delivery.
+
+This project implements those reliability mechanisms on top of UDP. Each data
+packet carries a sequence number, acknowledgment number, payload, and CRC
+checksum. The sender transmits a packet and waits for an acknowledgment; if the
+acknowledgment does not arrive before the timeout expires, the sender resends
+the packet. The sender supports stop and wait as well as a configurable sending
+window, so the same code can be tested with one or many outstanding packets.
+The receiver validates each incoming checksum, acknowledges valid packets,
+buffers in-window packets, and delivers data upward in sequence order.
+
+The packet format is kept simple for testing:
+\texttt{seq\_num\allowbreak|\allowbreak ack\_num\allowbreak|\allowbreak payload\allowbreak|\allowbreak checksum}.
+This format is easy to print and inspect while verifying behavior.
+Testing was done with local UDP sockets and with controlled network conditions
+introduced by Linux \texttt{tc netem} and project scripts that inject delay,
+packet loss, corruption, duplication, reordering, and configured retry and
+timeout limits.
+\section{Background and Motivation}
+UDP does not provide reliable delivery. This is a real problem for any application that wants UDP's low overhead but still needs to know whether data arrived correctly. Currently an application cannot tell if a datagram was lost, corrupted, duplicated, or delivered out of order unless there is extra logic.
+
+The textbook framing of this problem is reliable data transfer (RDT), developed
+incrementally in Kurose and Ross Chapter 3.4 from a perfect channel up through
+pipelined protocols such as Go-Back-N and Selective Repeat \cite{b3}. TCP is the
+production example of a reliable transport protocol, and it uses sequence
+numbers, acknowledgments, retransmission, and flow control to provide a
+reliable byte stream \cite{b1}. The RDT progression studies these same
+mechanisms in a smaller setting, so the behavior is easier to inspect.
+
+The current state of practice is not limited to TCP. QUIC is a modern transport
+protocol that runs over UDP and provides reliable streams, loss recovery, flow
+control, and security as part of the transport design \cite{b2}. This project
+does not try to reproduce TCP or QUIC. Instead, it implements the core reliability
+ideas over UDP so the main protocol behavior can be tested directly.
+\section{Protocol Design}
+
+\subsection{Packet Format}
+Each packet uses four fields: sequence number, acknowledgment number, payload,
+and checksum. For debugging, the project uses a simple text format:
+\texttt{seq\_num|ack\_num|payload|checksum}. This made it easier to print
+packets and confirm that the sender and receiver parsed the same fields. The
+tradeoff is that the format is not binary efficient and the payload cannot
+contain the \texttt{|} character.
+
+\subsection{Checksum}
+For error detection the protocol uses a Cyclic Redundancy Check (CRC), as
+described in Kurose and Ross \S6.2.3 \cite{b3}. CRC treats the packet header
+and payload as a binary string $D$, appends $r$ zero bits, and divides the
+result modulo 2 by a fixed generator $G$ of $r{+}1$ bits. The remainder $R$ is
+the checksum that travels in the packet. The receiver runs the same division
+on the received bits and compares the recomputed remainder against $R$; if
+they differ, the packet is treated as corrupted and dropped.
+
+This implementation uses the 9-bit generator \texttt{111010101}, so the
+checksum is the 8-bit CRC remainder. An $r$-bit CRC catches every error burst
+of length $r$ or fewer and detects longer bursts with high probability
+\cite{b3}, which is why CRC is a stronger choice than the simple byte-sum
+checksum the project used earlier (still available as a fallback in
+\texttt{calculate\_checksum} when \texttt{use\_crc=False}). On the sender side
+the checksum is computed over \texttt{seq\_num}, \texttt{ack\_num}, and
+\texttt{payload} before the packet is sent; the receiver recomputes it the
+same way on arrival.
+
+\begin{lstlisting}[language=Python]
+generator = '111010101'
+data_str = f"{seq_num}|{ack_num}|{payload}"
+data_as_binary_str = string_to_binary(data_str)
+data_as_binary_str = data_as_binary_str + ('0' * (len(generator)-1))
+remainder = divide_modulo_2(data_as_binary_str, generator)
+return int(remainder, 2)
+\end{lstlisting}
+
+\subsection{Acknowledgments and Retransmission}
+The protocol uses positive acknowledgments. After sending a packet, the sender
+waits for an ACK that contains the acknowledged sequence number. If the ACK
+does not arrive before the timeout expires, the sender retransmits the packet.
+The sender also ignores malformed acknowledgments and acknowledgments with bad
+checksums. This gives the sender a direct recovery mechanism when packets or
+ACKs are lost.
+
+\subsection{Stop and Wait}
+The simplest configuration of the sender uses a window size of one, which
+matches the stop and wait protocol (\textit{rdt 3.0}) in Kurose and Ross
+\S3.4.1 \cite{b3}. The sender transmits a single packet, starts a timer, and
+blocks for the matching ACK before sending the next packet. If the timer
+expires first, the same packet is retransmitted. This case is the baseline for
+all later experiments because every reliability mechanism (sequence numbers,
+checksums, ACKs, and timeouts) is exercised without the additional bookkeeping
+introduced by a larger window.
+
+\subsection{Sliding Window}
+With a window size greater than one, the sender can transmit multiple packets
+before all acknowledgments arrive, which improves throughput on links with
+non-trivial round-trip time. The implementation keeps track of unacknowledged
+packets inside the active window and retransmits timed out packets
+individually rather than rolling back the whole window. The receiver also
+keeps a small buffer for valid packets that arrive inside its receive window,
+so out of order packets can be acknowledged immediately and delivered upward
+later when the missing earlier packets arrive.
+
+\section{Implementation}
+
+\subsection{Sender}
+The sender handles the main reliability logic. It reads a message from the
+command line or a file, splits the message into payload sized chunks, assigns
+sequence numbers, computes checksums, and sends the packets over a UDP socket.
+For each outstanding packet, it stores the packet data, the number of send
+attempts, and the time the packet was last transmitted.
+
+The sender accepts several parameters at runtime, including destination host and
+port, timeout, payload size, window size, and maximum retries. This made it
+possible to test both a stop and wait configuration and a larger sending window
+without changing the code. The sender also records statistics such as original
+packets, total packets sent, retransmissions, timeouts, acknowledgments
+received, malformed acknowledgments, and checksum failures.
+
+The sender parses each incoming ACK, checks whether it is malformed, and
+validates its checksum. The receiver computes checksums for ACK packets, and the
+sender also has an optional compatibility mode for older checksum zero ACKs.
+The sender implementation covers sequence numbering, timeout recovery,
+retransmission, and configurable window support.
+
+Packet construction is done before any data is sent. Each chunk gets the next
+sequence number, and the checksum is computed from the packet fields.
+
+\begin{lstlisting}[language=Python]
+packets = []
+for offset, payload in enumerate(chunks):
+    self._validate_payload(payload)
+    seq_num = self.seq_num + offset
+    checksum = calculate_checksum(seq_num, 0, payload)
+    packets.append(Packet(seq_num, 0, payload, checksum))
+return packets
+\end{lstlisting}
+
+The sender tracks unacknowledged packets by sequence number. On each loop, it
+sends any unsent packets that still fit inside the current window.
+
+\begin{lstlisting}[language=Python]
+window_base = min(states)
+window_limit = window_base + self.window_size
+
+while next_to_send <= final_seq \
+        and next_to_send < window_limit:
+    if next_to_send in states:
+        self._send_packet(states[next_to_send])
+    next_to_send += 1
+
+ack_num = self._receive_ack()
+if ack_num in states:
+    del states[ack_num]
+\end{lstlisting}
+
+ACKs are only accepted if they can be parsed and pass the sender's checksum
+check.
+
+\begin{lstlisting}[language=Python]
+try:
+    ack_packet = extract_from_bytes(ack_bytes)
+except (UnicodeDecodeError, ValueError, IndexError):
+    self.stats.malformed_acks += 1
+    return None
+
+if not self._ack_checksum_is_valid(ack_packet):
+    self.stats.bad_ack_checksums += 1
+    return None
+
+return ack_packet.ack_num
+\end{lstlisting}
+
+Retransmission is also handled by sequence number. If a packet has not been
+acknowledged before its timeout expires, the sender sends that packet again.
+
+\begin{lstlisting}[language=Python]
+if last_sent is not None and now - last_sent >= self.timeout:
+    self.stats.timeouts += 1
+    self._send_packet(states[seq_num])
+\end{lstlisting}
+
+\subsection{Receiver}
+The receiver handles the validation and delivery side of the protocol. It binds
+a UDP socket, waits for incoming packets, parses each packet, and checks the
+packet checksum before accepting the data. The receiver keeps a receive window,
+a buffer for valid packets, and the next expected sequence number. This allows
+it to accept packets that arrive out of order while still delivering data upward
+only in sequence order.
+
+The receiver also builds ACK packets with the acknowledged sequence number. The
+ACK checksum is computed over the ACK fields before the packet is sent back to
+the sender.
+
+\begin{lstlisting}[language=Python]
+def send_ack(self, ack_num, addr):
+    checksum = calculate_checksum(0, ack_num, '')
+    p = Packet(0, ack_num, '', checksum)
+    self.s.sendto(convert_to_bytes(p), addr)
+\end{lstlisting}
+
+When a packet arrives, the receiver recalculates the checksum from the received
+sequence number, acknowledgment number, and payload. If the checksum does not
+match, the packet is ignored and no payload is delivered.
+
+\begin{lstlisting}[language=Python]
+calculated_checksum = calculate_checksum(
+    p.seq_num, p.ack_num, p.payload
+)
+if p.checksum != calculated_checksum:
+    continue
+\end{lstlisting}
+
+After a packet passes the checksum check, the receiver compares the sequence
+number to the current receive window. If the packet was already received
+recently, the receiver sends the ACK again. This handles the symmetric loss
+case: when the original ACK is dropped, the sender's timer fires and it
+retransmits the same sequence number, so the receiver must re-acknowledge it
+or the sender will keep retransmitting until \texttt{max\_retries} is reached
+and the transfer aborts.
+
+\begin{lstlisting}[language=Python]
+if p.seq_num >= self.expected_seq_num - self.window_size \
+        and p.seq_num < self.expected_seq_num:
+    self.send_ack(p.seq_num, addr)
+\end{lstlisting}
+
+If the packet is inside the current receive window, the receiver acknowledges it
+and stores it in the buffer. The receiver then slides forward while the next
+expected sequence number is already present in the buffer.
+
+\begin{lstlisting}[language=Python]
+elif p.seq_num >= self.expected_seq_num \
+        and p.seq_num < self.expected_seq_num + self.window_size:
+    self.send_ack(p.seq_num, addr)
+
+    if p.seq_num not in self.buffer:
+        self.buffer[p.seq_num] = p
+
+    while self.expected_seq_num in self.buffer:
+        self.buffer.pop(self.expected_seq_num)
+        self.expected_seq_num += 1
+\end{lstlisting}
+
+Packets outside the receive window are ignored. This keeps the receiver from
+accepting packets that are too far ahead of the current delivery point or no
+longer relevant to the active window.
+
+\subsection{Testing Scripts}
+Three Python scripts in \texttt{scripts/} drive the experiments, and a fourth
+manual smoke test was used during development.
+
+The smoke test runs the sender and receiver in two terminals without any
+wrapper:
+
+\begin{lstlisting}[language=bash]
+python3 receiver.py
+python3 sender.py --message "testing a larger sender window" \
+    --payload-size 4 --window-size 10
+\end{lstlisting}
+
+This run confirmed that messages were split into the expected number of
+packets, that ACKs were received in order, and that the receiver delivered
+the data upward without any artificial impairment.
+
+\texttt{run\_preset\_tests.py} starts a fresh receiver, runs the sender
+against a named preset, and writes per-run sender and receiver logs. The
+script also exposes an interactive \texttt{--menu} option that lists the
+available presets later summarized in Table~\ref{tab:setup}, so that one
+impairment at a time can be exercised during a demonstration.
+
+\texttt{run\_proxy\_tests.py} inserts an in-process proxy between the sender
+and the receiver. The proxy applies deterministic delay, jitter, loss,
+corruption, duplication, and reordering according to a preset, so the
+impairments are reproducible across runs without depending on
+\texttt{tc netem} configuration on the host. The proxy reordering preset is
+the test that most clearly distinguishes sender-side ordering from receiver
+arrival order, because the sender log shows sequence numbers leaving in
+order while the receiver log shows them arriving out of order before being
+buffered and delivered in sequence.
+
+\texttt{summarize\_results.py} parses the saved logs and reports the per-run
+counters defined by \texttt{SenderStats}: original packets, packets sent,
+retransmissions, timeouts, ACKs received, bad ACK checksums, malformed ACKs,
+and unexpected ACKs.
+
+\section{Experimental Setup}
+Each preset fixes a network impairment profile and the sender configuration
+used to run against it. Table~\ref{tab:setup} summarizes the presets used in
+the local tests. Window size, timeout, payload size, and maximum retries are
+the same sender parameters exposed on the command line, so the tests cover
+both stop and wait (window size $1$) and a small sliding window (window size
+$4$). The raw logs are grouped under
+\texttt{linux\_test\_results/01\_two\_terminal\_manual\_demo/},
+\texttt{linux\_test\_results/02\_tc\_netem\_preset\_tests/}, and
+\texttt{linux\_test\_results/03\_proxy\_impairment\_tests/}. A final
+intentional failure test is saved under
+\texttt{linux\_test\_results/04\_limit\_failure\_test/}, and a high-loss
+threshold test is saved under
+\texttt{linux\_test\_results/05\_loss\_threshold\_test/}. A timeout tuning
+test is saved under
+\texttt{linux\_test\_results/06\_timeout\_threshold\_test/}. The proxy presets
+(\texttt{all\_tests} and \texttt{rigorous\_test}) combine multiple impairments
+at once and use a longer message so the sender has to split it across many
+packets.
+
+\begin{table}[t]
+\caption{Test presets. ``--'' = default sender retry budget.}
+\label{tab:setup}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|c|c|c|c|c|c|c|}
+\hline
+\textbf{Preset} & \textbf{Delay} & \textbf{Loss} & \textbf{Corrupt} & \textbf{Duplicate} & \textbf{Reorder} & \textbf{Window} & \textbf{Retries} \\
+\hline
+baseline & 0 & 0 & 0 & 0 & 0 & 1 & -- \\
+delay\_100ms & 100\,ms & 0 & 0 & 0 & 0 & 1 & -- \\
+loss\_5\_percent & 0 & 5\% & 0 & 0 & 0 & 1 & -- \\
+corrupt\_2\_percent & 0 & 0 & 2\% & 0 & 0 & 1 & -- \\
+corrupt\_10\_percent & 0 & 0 & 10\% & 0 & 0 & 1 & -- \\
+window\_4\_baseline & 0 & 0 & 0 & 0 & 0 & 4 & -- \\
+delay\_100ms\_loss\_5\_percent & 100\,ms & 5\% & 0 & 0 & 0 & 1 & -- \\
+extreme\_test & 100$\pm$20\,ms & 10\% & 5\% & 2\% & 5\% & 4 & 50 \\
+all\_tests (proxy) & 100$\pm$20\,ms & 5\% & 2\% & 1\% & 2\% & 4 & 40 \\
+rigorous\_test (proxy) & 100$\pm$30\,ms & 10\% & 5\% & 2\% & 5\% & 1 & 80 \\
+stress\_loss\_100 & 0 & 100\% & 0 & 0 & 0 & 1 & 3 \\
+stress\_loss\_70 & 0 & 70\% & 0 & 0 & 0 & 1 & 3 \\
+stress\_delay\_500\_timeout\_100ms & 500\,ms & 0 & 0 & 0 & 0 & 1 & 3 \\
+\hline
+\end{tabular}}
+\end{table}
+
+\section{Results}
+Table~\ref{tab:results} reports the counters parsed from the sender logs in
+\texttt{linux\_test\_results/} for each preset. Every non-stress preset listed
+completed successfully, meaning the sender exited only after every packet was
+acknowledged; the three stress entries failed by design.
+
+\begin{table}[t]
+\caption{Sender stats per preset (from \texttt{linux\_test\_results/}).}
+\label{tab:results}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Preset} & \textbf{Result} & \textbf{Original} & \textbf{Sent} & \textbf{Retransmissions} & \textbf{Timeouts} & \textbf{ACKs} \\
+\hline
+baseline & Pass & 10 & 10 & 0 & 0 & 10 \\
+delay\_100ms & Pass & 10 & 10 & 0 & 0 & 10 \\
+loss\_5\_percent & Pass & 10 & 12 & 2 & 2 & 10 \\
+corrupt\_2\_percent & Pass & 11 & 11 & 0 & 0 & 11 \\
+corrupt\_10\_percent & Pass & 11 & 13 & 2 & 2 & 11 \\
+window\_4\_baseline & Pass & 11 & 11 & 0 & 0 & 11 \\
+delay\_100ms\_loss\_5\_percent & Pass & 8 & 9 & 1 & 1 & 8 \\
+extreme\_test & Pass & 29 & 46 & 17 & 17 & 29 \\
+all\_tests & Pass & 17 & 59 & 42 & 42 & 17 \\
+rigorous\_test & Pass & 46 & 62 & 16 & 16 & 49 \\
+stress\_loss\_100 & Fail & 8 & -- & -- & -- & 0 \\
+stress\_loss\_70 & Fail & 9 & -- & -- & -- & 0 \\
+stress\_delay\_500\_timeout\_100ms & Fail & 10 & -- & -- & -- & 0 \\
+\hline
+\end{tabular}}
+\end{table}
+
+In the clean cases (baseline, delay only, and the window-of-four baseline),
+\texttt{packets\_sent} equals \texttt{original\_packets} and there are no
+timeouts or retransmissions, which confirms the sender, receiver,
+packetization, CRC, ACK, and delivery path on the happy path. The
+\texttt{delay\_100ms} run shows that the default $1.0\,\text{s}$ timeout is
+larger than the added round-trip delay, so the sender does not retransmit
+unnecessarily.
+
+The lossy and corrupt cases show the recovery path. With $5\%$ loss the
+sender saw two timeouts and recovered with two retransmissions, ending with
+$10$ ACKs for $10$ original packets. The $10\%$ corruption case is similar:
+two corrupt packets are dropped by the receiver's CRC check, the sender's
+timer fires, and two retransmissions complete the transfer. The $2\%$
+corruption case finished with no retransmissions because no packet happened
+to be corrupted in that particular run.
+
+The combined \texttt{tc netem} presets show the same recovery behavior under
+multiple impairments. \texttt{delay\_100ms\_loss\_5\_percent} needed one
+retransmission to deliver eight original packets. \texttt{extreme\_test}
+combined delay, jitter, loss, corruption, duplication, and reordering with a
+window size of four; it still completed, but it required $46$ packets sent for
+$29$ original packets.
+
+The two proxy presets stress the protocol with several impairments at once.
+\texttt{all\_tests} sent $59$ packets to deliver $17$ original packets, with
+$42$ retransmissions and $42$ timeouts, all driven by the proxy's combined
+loss, corruption, duplication, and reordering. \texttt{rigorous\_test} runs in
+stop and wait over a longer message: $46$ original packets, $62$ packets sent,
+$16$ retransmissions, and $49$ ACKs received. Three of those ACKs failed the
+sender's CRC check (\texttt{bad\_ack\_checksums=3}) and were ignored, which is
+the expected behavior when the proxy corrupts an ACK on the return path.
+
+The intentional failure test used Linux \texttt{tc netem} with $100\%$ packet
+loss, window size $1$, a small sub-second timeout, and
+\texttt{max\_retries=3}.
+The sender repeatedly retransmitted sequence number $0$ and then exited with
+\texttt{TimeoutError: no valid ACK for seq=0 after 3 retransmission(s)}. The
+receiver log contains only the startup message, which is consistent with the
+network dropping every packet before it reached the receiver.
+
+The threshold-style failure test used $70\%$ packet loss with the same retry
+cap and a small sub-second timeout. In that run, the receiver did receive and ACK sequence number
+$0$, but the sender still did not receive a valid ACK before the retry limit.
+This shows that the failure point is not only complete loss; a high enough loss
+rate can also exhaust the configured retry budget.
+
+The more realistic timeout-threshold test used no packet loss, but added
+$500\,\text{ms}$ of delay while the sender timeout was only
+$100\,\text{ms}$. The receiver log shows that sequence number $0$ arrived and
+was ACKed multiple times. However, the sender retransmitted and hit
+\texttt{max\_retries=3} before a delayed ACK arrived back in time. This
+demonstrates a practical limitation: even when packets are not lost, a timeout
+that is too small for the path delay can make a reliable transfer fail.
+
+\section{Discussion}
+The results show that the implementation matches the textbook RDT model
+inside its configured limits. The CRC catches corrupt packets in both
+directions. Sequence numbers handled the duplicates the proxy injected,
+and retransmission covered the packet losses. Out-of-order arrivals were
+absorbed by the receiver's buffer so the upper layer still sees ordered
+data. The window-of-four cases confirm that the sliding window logic does
+not break correctness on the easy paths.
+
+The protocol still has a clear configured limit even though the final
+\texttt{extreme\_test} run completed successfully. The
+\texttt{stress\_loss\_100}, \texttt{stress\_loss\_70}, and
+\texttt{stress\_delay\_500\_timeout\_100ms} runs show that a single sequence
+number that is repeatedly lost or repeatedly unacknowledged blocks progress.
+Once its send attempt count exceeds
+\texttt{max\_retries}, the sender raises \texttt{TimeoutError} and aborts
+rather than hanging forever. This is the right failure mode for a fixed-retry
+sender, but it also shows that under harsher conditions the protocol depends on
+retry budget and timeout values being tuned to the network, not on the
+mechanisms themselves.
+
+A second observation comes from the \texttt{packets\_sent} versus
+\texttt{original\_packets} ratio. In the clean cases the ratio is $1.0$; in
+the proxy \texttt{all\_tests} run it is roughly $3.5$. That overhead is the
+direct cost of reliability under combined loss, corruption, and reordering,
+and it grows with the impairment rate as expected.
+
+\section{Conclusion}
+This project added reliability to a UDP-based transport. The sender uses
+sequence numbers, CRC checksums, and timers with retransmission. The
+receiver validates checksums, acknowledges valid packets, and buffers
+in-window arrivals so it can deliver data in order. Both sides support a
+configurable window so the protocol can run as stop and wait or with
+multiple packets in flight. These are the same RDT mechanisms covered in
+the textbook.
+
+The same sender and receiver code passed clean baselines,
+single-impairment tests, and combined proxy stress tests. When the network
+got harsher than the sender was configured for, the protocol did not
+deadlock; it hit the retry cap and exited with a clear error. The three
+aggressive stress tests ($100\%$ loss, $70\%$ loss, and $500\,\text{ms}$
+delay against a $100\,\text{ms}$ timeout) confirm this boundary. The
+implementation is small enough to read end to end, which made it useful
+for checking each RDT idea on its own.
+
+\section{Future Work}
+Several improvements would make the implementation closer to a production
+transport. The text packet format should be replaced with a binary-safe
+encoding so payloads can contain the \texttt{|} separator and arbitrary
+file bytes. The receiver should be able to write delivered payloads to a
+file rather than only printing them, and the protocol should add an
+explicit end-of-message or connection teardown packet so the receiver
+knows when a transfer is complete. An adaptive timeout based on measured
+round-trip samples, similar to TCP's RTT estimation, would let the sender adjust
+to path delay automatically rather than relying on a fixed value \cite{b3}. On the testing
+side, automated unit tests and CI-style regression tests would help catch
+protocol edge cases, and additional sweeps across window sizes and loss rates
+would show how throughput trades off against reliability.
+
+\section*{Acknowledgment}
+The authors thank the CS 5470 instructor for course material on reliable
+data transfer, and reference the textbook by Kurose and Ross for the RDT
+progression and the CRC presentation that this project follows.
+
+\begin{thebibliography}{00}
+\bibitem{b1} W. Eddy, ``Transmission Control Protocol (TCP),'' RFC 9293,
+Internet Engineering Task Force, Aug. 2022.
+
+\bibitem{b2} J. Iyengar and M. Thomson, ``QUIC: A UDP-Based Multiplexed and
+Secure Transport,'' RFC 9000, Internet Engineering Task Force, May 2021.
+
+\bibitem{b3} J. F. Kurose and K. W. Ross, \textit{Computer Networking: A
+Top-Down Approach}, 8th ed. Hoboken, NJ, USA: Pearson, 2021.
+
+\end{thebibliography}
+
+\end{document}

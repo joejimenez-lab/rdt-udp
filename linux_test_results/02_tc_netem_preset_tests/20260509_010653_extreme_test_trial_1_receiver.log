@@ -1,0 +1,142 @@
+Receiver started...
+current window: 0 - 10
+printing the extracted packet: Packet(seq_num=0, ack_num=0, payload=Extreme reliable UDP test message. This file is intentionally lo, checksum=40)
+sent ACK: 0 to ('127.0.0.1', 57213)
+delivering 0 to the upper layer
+current window: 1 - 11
+printing the extracted packet: Packet(seq_num=2, ack_num=0, payload=ss multiple packets while delay, jitter, loss, corruption, dupli, checksum=101)
+sent ACK: 2 to ('127.0.0.1', 57213)
+current window: 1 - 11
+printing the extracted packet: Packet(seq_num=1, ack_num=0, payload=nger than the default message so the sender has to split it acro, checksum=114)
+sent ACK: 1 to ('127.0.0.1', 57213)
+delivering 1 to the upper layer
+delivering 2 to the upper layer
+current window: 3 - 13
+printing the extracted packet: Packet(seq_num=5, ack_num=0, payload= so the sender has to split it across multiple packets while del, checksum=169)
+sent ACK: 5 to ('127.0.0.1', 57213)
+current window: 3 - 13
+printing the extracted packet: Packet(seq_num=6, ack_num=0, payload=ay, jitter, loss, corruption, duplication, and reordering are ac, checksum=233)
+sent ACK: 6 to ('127.0.0.1', 57213)
+current window: 3 - 13
+printing the extracted packet: Packet(seq_num=6, ack_num=0, payload=ay, jitter, loss, corruption, duplication, and reordering are ac, checksum=233)
+sent ACK: 6 to ('127.0.0.1', 57213)
+current window: 3 - 13
+printing the extracted packet: Packet(seq_num=4, ack_num=0, payload=sage. This file is intentionally longer than the default message, checksum=15)
+sent ACK: 4 to ('127.0.0.1', 57213)
+current window: 3 - 13
+printing the extracted packet: Packet(seq_num=3, ack_num=0, payload=cation, and reordering are active. Extreme reliable UDP test mes, checksum=116)
+sent ACK: 3 to ('127.0.0.1', 57213)
+delivering 3 to the upper layer
+delivering 4 to the upper layer
+delivering 5 to the upper layer
+delivering 6 to the upper layer
+current window: 7 - 17
+printing the extracted packet: Packet(seq_num=8, ack_num=0, payload=lly longer than the default message so the sender has to split i, checksum=169)
+sent ACK: 8 to ('127.0.0.1', 57213)
+current window: 7 - 17
+printing the extracted packet: Packet(seq_num=7, ack_num=0, payload=tive. Extreme reliable UDP test message. This file is intentiona, checksum=87)
+sent ACK: 7 to ('127.0.0.1', 57213)
+delivering 7 to the upper layer
+delivering 8 to the upper layer
+current window: 9 - 19
+printing the extracted packet: Packet(seq_num=9, ack_num=0, payload=t across multiple packets while delay, jitter, loss, corruption,, checksum=128)
+sent ACK: 9 to ('127.0.0.1', 57213)
+delivering 9 to the upper layer
+current window: 10 - 20
+printing the extracted packet: Packet(seq_num=11, ack_num=0, payload=st message. This file is intentionally longer than the default m, checksum=31)
+sent ACK: 11 to ('127.0.0.1', 57213)
+current window: 10 - 20
+printing the extracted packet: Packet(seq_num=8, ack_num=0, payload=lly longer than the default message so the sender has to split i, checksum=169)
+sent ACK: 8 to ('127.0.0.1', 57213)
+current window: 10 - 20
+printing the extracted packet: Packet(seq_num=10, ack_num=0, payload= duplication, and reordering are active. Extreme reliable UDP te, checksum=38)
+sent ACK: 10 to ('127.0.0.1', 57213)
+delivering 10 to the upper layer
+delivering 11 to the upper layer
+current window: 12 - 22
+printing the extracted packet: Packet(seq_num=11, ack_num=0, payload=st message. This file is intentionally longer than the default m, checksum=31)
+sent ACK: 11 to ('127.0.0.1', 57213)
+current window: 12 - 22
+printing the extracted packet: Packet(seq_num=12, ack_num=0, payload=essage so the sender has to split it across multiple packets whi, checksum=101)
+sent ACK: 12 to ('127.0.0.1', 57213)
+delivering 12 to the upper layer
+current window: 13 - 23
+printing the extracted packet: Packet(seq_num=14, ack_num=0, payload=are active. Extreme reliable UDP test message. This file is inte, checksum=132)
+sent ACK: 14 to ('127.0.0.1', 57213)
+current window: 13 - 23
+printing the extracted packet: Packet(seq_num=16, ack_num=0, payload=plit it across multiple packets while delay, jitter, loss, corru, checksum=236)
+sent ACK: 16 to ('127.0.0.1', 57213)
+current window: 13 - 23
+printing the extracted packet: Packet(seq_num=13, ack_num=0, payload=le delay, jitter, loss, corruption, duplication, and reordering , checksum=223)
+sent ACK: 13 to ('127.0.0.1', 57213)
+delivering 13 to the upper layer
+delivering 14 to the upper layer
+current window: 15 - 25
+printing the extracted packet: Packet(seq_num=18, ack_num=0, payload=UDP test message. This file is intentionally longer than the def, checksum=39)
+sent ACK: 18 to ('127.0.0.1', 57213)
+current window: 15 - 25
+printing the extracted packet: Packet(seq_num=17, ack_num=0, payload=ption, duplication, and reordering are active. Extreme reliable , checksum=240)
+sent ACK: 17 to ('127.0.0.1', 57213)
+current window: 15 - 25
+printing the extracted packet: Packet(seq_num=15, ack_num=0, payload=ntionally longer than the default message so the sender has to s, checksum=182)
+sent ACK: 15 to ('127.0.0.1', 57213)
+delivering 15 to the upper layer
+delivering 16 to the upper layer
+delivering 17 to the upper layer
+delivering 18 to the upper layer
+current window: 19 - 29
+printing the extracted packet: Packet(seq_num=18, ack_num=0, payload=UDP test message. This file is intentionally longer than the def, checksum=39)
+sent ACK: 18 to ('127.0.0.1', 57213)
+current window: 19 - 29
+printing the extracted packet: Packet(seq_num=20, ack_num=0, payload=ts while delay, jitter, loss, corruption, duplication, and reord, checksum=171)
+sent ACK: 20 to ('127.0.0.1', 57213)
+current window: 19 - 29
+printing the extracted packet: Packet(seq_num=19, ack_num=0, payload=ault message so the sender has to split it across multiple packe, checksum=202)
+sent ACK: 19 to ('127.0.0.1', 57213)
+delivering 19 to the upper layer
+delivering 20 to the upper layer
+current window: 21 - 31
+printing the extracted packet: Packet(seq_num=21, ack_num=0, payload=ering are active. Extreme reliable UDP test message. This file i, checksum=86)
+sent ACK: 21 to ('127.0.0.1', 57213)
+delivering 21 to the upper layer
+current window: 22 - 32
+printing the extracted packet: Packet(seq_num=20, ack_num=0, payload=ts while delay, jitter, loss, corruption, duplication, and reord, checksum=171)
+sent ACK: 20 to ('127.0.0.1', 57213)
+current window: 22 - 32
+printing the extracted packet: Packet(seq_num=21, ack_num=0, payload=ering are active. Extreme reliable UDP test message. This file i, checksum=86)
+sent ACK: 21 to ('127.0.0.1', 57213)
+current window: 22 - 32
+printing the extracted packet: Packet(seq_num=18, ack_num=0, payload=UDP test message. This file is intentionally longer than the def, checksum=39)
+sent ACK: 18 to ('127.0.0.1', 57213)
+current window: 22 - 32
+printing the extracted packet: Packet(seq_num=18, ack_num=0, payload=UDP test message. This file is intentionally longer than the def, checksum=39)
+sent ACK: 18 to ('127.0.0.1', 57213)
+current window: 22 - 32
+printing the extracted packet: Packet(seq_num=24, ack_num=0, payload= corruption, duplication, and reordering are active. Extreme rel, checksum=143)
+sent ACK: 24 to ('127.0.0.1', 57213)
+current window: 22 - 32
+printing the extracted packet: Packet(seq_num=22, ack_num=0, payload=s intentionally longer than the default message so the sender ha, checksum=217)
+sent ACK: 22 to ('127.0.0.1', 57213)
+delivering 22 to the upper layer
+current window: 23 - 33
+printing the extracted packet: Packet(seq_num=26, ack_num=0, payload=he default message so the sender has to split it across multiple, checksum=56)
+sent ACK: 26 to ('127.0.0.1', 57213)
+current window: 23 - 33
+printing the extracted packet: Packet(seq_num=25, ack_num=0, payload=iable UDP test message. This file is intentionally longer than t, checksum=161)
+sent ACK: 25 to ('127.0.0.1', 57213)
+current window: 23 - 33
+printing the extracted packet: Packet(seq_num=23, ack_num=0, payload=s to split it across multiple packets while delay, jitter, loss,, checksum=208)
+sent ACK: 23 to ('127.0.0.1', 57213)
+delivering 23 to the upper layer
+delivering 24 to the upper layer
+delivering 25 to the upper layer
+delivering 26 to the upper layer
+current window: 27 - 37
+printing the extracted packet: Packet(seq_num=27, ack_num=0, payload= packets while delay, jitter, loss, corruption, duplication, and, checksum=245)
+sent ACK: 27 to ('127.0.0.1', 57213)
+delivering 27 to the upper layer
+current window: 28 - 38
+printing the extracted packet: Packet(seq_num=28, ack_num=0, payload= reordering are active. , checksum=183)
+sent ACK: 28 to ('127.0.0.1', 57213)
+delivering 28 to the upper layer
+current window: 29 - 39
