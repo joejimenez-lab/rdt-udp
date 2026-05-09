@@ -141,10 +141,10 @@ or delay exceeds the configured retry/timeout budget, the sender raises
 
 ## Reports and Presentation
 
-- Final report source: `Docs/Papers/finaReport.tex`
+- Final report source: `Docs/Papers/FinalReport.tex`
 - Progress report source: `Docs/Papers/ProgressReport.tex`
 - Proposal PDF: `Docs/Papers/CS5470_Proposal.pdf`
-- Final presentation PDF: `Docs/Slides/Final Presentatiomn - CS5470 (2).pdf`
+- Final presentation PDF: `Docs/Slides/Final_Presentation_CS5470.pdf`
 
 ## Current Limitations
 
